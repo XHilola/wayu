@@ -1,0 +1,92 @@
+📰 News
+
+Not rocket science.
+
+news
+newsCategories
+tags
+newsTags
+
+👉 news: news + newsCategories + tags + newsTags
+
+🌍 Common (shared/global stuff)
+
+Your instinct here is correct, surprisingly.
+
+languages
+countries
+
+👉 common: languages + countries
+
+(These will be reused everywhere, so don’t bury them in some random module like a secret)
+
+🏢 Organization
+
+The “we exist in multiple places” package.
+
+branches
+representatives
+
+👉 organization: branches + representatives
+
+📢 Content (non-news stuff)
+
+All the “website filler but important” content.
+
+staticInfo
+socialLinks
+usefulLinks
+faqs
+faqsTags
+instagramPosts
+
+👉 content: staticInfo + socialLinks + usefulLinks + faqs + faqsTags + instagramPosts
+
+🎉 Events
+
+Self-contained enough.
+
+events
+eventCategories
+
+👉 events: events + eventCategories
+
+💰 Finance
+
+Money. Keep it isolated or regret it later.
+
+donations
+expenses
+paymentProvider
+
+👉 finance: donations + expenses
+
+💼 Recruitment
+
+HR simulator.
+
+vacancies
+applications
+vacancyType
+applicationStatus
+
+👉 recruitment: vacancies + applications
+
+❓ Support / Questions
+
+People asking things they could’ve Googled.
+
+questions
+questionStatus
+
+👉 support: questions
+
+📚 Library
+
+Your mini digital archive.
+
+books
+authors
+bookCategories
+
+👉 library: books + authors + bookCategories
