@@ -4,24 +4,29 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { CreateFaqsResponse } from './create-faqs-response';
 import { plainToInstance } from 'class-transformer';
-import { In } from 'typeorm';
 import { Tags } from '../../../../news/entities/tags.entity';
+import { In } from 'typeorm';
 
 @Injectable()
 @CommandHandler(CreateFaqsRequest)
 export class CreateFaqsHandler implements ICommandHandler<CreateFaqsRequest> {
-  async execute(req: CreateFaqsRequest): Promise<CreateFaqsResponse> {
-    const exists = await Faqs.findOneBy({ question: req.question });
-    if (exists) throw new BadRequestException('Faq with this question already exists');
+  async execute(command: CreateFaqsRequest) {
+    const exists = await Faqs.findOneBy({ question: command.question });
+    if (exists)
+      throw new BadRequestException('FAQ with this question already exists');
 
-    const tags = await Tags.findBy({ id: In(req.tagIds) });
+    const tags = await Tags.findBy({ id: In(command.tagId) });
 
     const faq = Faqs.create({
-      question: req.question,
-      answer: req.answer,
+      question: command.question,
+      answer: command.answer,
       tags,
     });
-    await Faqs.save(faq);
-    return plainToInstance(CreateFaqsResponse, faq, { excludeExtraneousValues: true });
+
+    const savedFaq = await Faqs.save(faq);
+
+    return plainToInstance(CreateFaqsResponse, savedFaq, {
+      excludeExtraneousValues: true,
+    });
   }
 }

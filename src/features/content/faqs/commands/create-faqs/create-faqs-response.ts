@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose, Type } from 'class-transformer';
-import { Query } from '@nestjs/cqrs';
+import { Command, Query } from '@nestjs/cqrs';
 
 class TagResponse {
   @Expose()
@@ -12,7 +12,7 @@ class TagResponse {
   title!: string;
 }
 
-export class CreateFaqsResponse extends Query<CreateFaqsResponse> {
+export class CreateFaqsResponse {
   @Expose()
   @ApiProperty()
   id!: number;

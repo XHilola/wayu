@@ -1,8 +1,9 @@
 import { IsArray, IsInt, IsString, MaxLength } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Command } from '@nestjs/cqrs';
+import { CreateFaqsResponse } from './create-faqs-response';
 
-export class CreateFaqsRequest extends Command<CreateFaqsRequest> {
+export class CreateFaqsRequest extends Command<CreateFaqsResponse> {
   @IsString()
   @ApiProperty()
   @MaxLength(256)
@@ -15,6 +16,6 @@ export class CreateFaqsRequest extends Command<CreateFaqsRequest> {
 
   @IsArray()
   @IsInt({ each: true })
-  @ApiProperty({ type: [Number] })
-  tagIds!: number[];
+  @ApiProperty()
+  tagId!: number[];
 }
