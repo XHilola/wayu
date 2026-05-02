@@ -4,7 +4,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { CreateFaqsResponse } from './create-faqs-response';
 import { plainToInstance } from 'class-transformer';
-import { Tags } from '../../../../news/entities/tags.entity';
+import { Tags } from '../../../../news/tags/tags.entity';
 import { In } from 'typeorm';
 
 @Injectable()

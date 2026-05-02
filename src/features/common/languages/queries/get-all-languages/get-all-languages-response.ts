@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 import { Query } from '@nestjs/cqrs';
 
-export class GetAllLanguagesResponse extends Query<GetAllLanguagesResponse> {
+export class GetAllLanguagesResponse{
   @Expose()
   @ApiProperty()
   id!: number;

@@ -1,19 +1,17 @@
+import { NotFoundException } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import {
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
-import { DeleteCountriesRequest } from './delete-countries-request';
+import fs from 'fs';
 import { Countries } from '../../countries.entity';
+import { DeleteCountriesCommand } from './delete-countries-command';
 
-@Injectable()
-@CommandHandler(DeleteCountriesRequest)
-export class DeleteCountriesHandler implements ICommandHandler<DeleteCountriesRequest> {
-  async execute(cmd: DeleteCountriesRequest):Promise<void> {
-    const country=await Countries.findOneBy({id:cmd.id})
-    if(!country){
-      throw new NotFoundException("Country doesn't exists")
-    }
-    await Countries.remove(country)
+@CommandHandler(DeleteCountriesCommand)
+export class DeleteCountriesHandler implements ICommandHandler<DeleteCountriesCommand> {
+  async execute(cmd: DeleteCountriesCommand): Promise<void> {
+    const country = await Countries.findOneBy({ id: cmd.id });
+    if (!country)
+      throw new NotFoundException('Country not found');
+    if (country.flag && fs.existsSync(country.flag))
+      fs.rmSync(country.flag);
+    await Countries.remove(country);
   }
 }

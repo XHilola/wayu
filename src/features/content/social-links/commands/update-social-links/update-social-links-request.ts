@@ -1,11 +1,25 @@
-import { IsOptional, IsString, MaxLength } from 'class-validator';
-import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Command } from '@nestjs/cqrs';
+import { ApiProperty } from '@nestjs/swagger';
+import { Allow, IsOptional, IsString, MaxLength } from 'class-validator';
+import { UpdateSocialLinksResponse } from './update-social-links-response';
 
-export class UpdateSocialLinksRequest extends Command<UpdateSocialLinksRequest> {
+export class UpdateSocialLinksRequest {
   id!: number;
 
-  @IsOptional() @IsString() @ApiPropertyOptional() @MaxLength(64)  title?: string;
-  @IsOptional() @IsString() @ApiPropertyOptional() @MaxLength(128) icon?: string;
-  @IsOptional() @IsString() @ApiPropertyOptional() @MaxLength(128) link?: string;
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  @MaxLength(64)
+  title?: string;
+
+  @ApiProperty({ type: 'string', format: 'binary', required: false })
+  @Allow()
+  @IsOptional()
+  icon?: string;
+
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  @MaxLength(128)
+  link?: string;
 }

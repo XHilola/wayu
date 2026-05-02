@@ -1,15 +1,21 @@
-import { GetAllEventsRequest } from './get-all-events-request';
-import { Events } from '../../events.entity';
-import { Injectable } from '@nestjs/common';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { GetAllEventsResponse } from './get-all-events-response';
 import { plainToInstance } from 'class-transformer';
+import { ConfigService } from '@nestjs/config';
+import { Events } from '../../events.entity';
+import { GetAllEventsRequest } from './get-all-events-request';
+import { GetAllEventsResponse } from './get-all-events-response';
 
-@Injectable()
 @QueryHandler(GetAllEventsRequest)
 export class GetAllEventsHandler implements IQueryHandler<GetAllEventsRequest> {
-  async execute(): Promise<GetAllEventsResponse[]> {
+  constructor(private readonly config: ConfigService) {}
+
+  async execute(query: GetAllEventsRequest): Promise<GetAllEventsResponse[]> {
     const events = await Events.find({ relations: ['category'] });
-    return plainToInstance(GetAllEventsResponse, events, { excludeExtraneousValues: true });
+    const baseUrl = this.config.getOrThrow<string>('BASE_URL');
+    return events.map((event) => {
+      const res = plainToInstance(GetAllEventsResponse, event, { excludeExtraneousValues: true });
+      res.image = `${baseUrl}/${event.image}`;
+      return res;
+    });
   }
 }

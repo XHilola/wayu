@@ -10,7 +10,8 @@ import { plainToInstance } from 'class-transformer';
 export class CreateLanguagesHandler implements ICommandHandler<CreateLanguagesRequest> {
   async execute(req: CreateLanguagesRequest): Promise<CreateLanguagesResponse> {
     const exists = await Languages.findOneBy({ title: req.title });
-    if (exists) throw new BadRequestException('Language already exists');
+    if (exists)
+      throw new BadRequestException('Language already exists');
 
     const language = Languages.create({ title: req.title });
     await Languages.save(language);

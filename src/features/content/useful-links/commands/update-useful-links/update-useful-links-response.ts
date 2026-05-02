@@ -1,10 +1,20 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
-import { Query } from '@nestjs/cqrs';
 
-export class UpdateUsefulLinksResponse extends Query<UpdateUsefulLinksResponse> {
-  @Expose() @ApiProperty() id!: number;
-  @Expose() @ApiProperty() title!: string;
-  @Expose() @ApiProperty() icon!: string;
-  @Expose() @ApiProperty() link!: string;
+export class UpdateUsefulLinksResponse {
+  @Expose()
+  @ApiProperty()
+  id!: number;
+
+  @Expose()
+  @ApiProperty()
+  title!: string;
+
+  @Expose()
+  @ApiProperty()
+  icon!: string;
+
+  @Expose()
+  @ApiProperty()
+  link!: string;
 }

@@ -1,29 +1,21 @@
-import { CreateEventsRequest } from './create-events-request';
-import { Events } from '../../events.entity';
-import { EventCategories } from '../../../event-categories/eventCategories.entity';
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { CreateEventsResponse } from './create-events-response';
 import { plainToInstance } from 'class-transformer';
+import { Events } from '../../events.entity';
+import { CreateEventsCommand } from './create-events-command';
+import { CreateEventsResponse } from './create-events-response';
 
-@Injectable()
-@CommandHandler(CreateEventsRequest)
-export class CreateEventsHandler implements ICommandHandler<CreateEventsRequest> {
-  async execute(req: CreateEventsRequest): Promise<CreateEventsResponse> {
-    const category = await EventCategories.findOneBy({ id: req.categoryId });
-    if (!category) throw new NotFoundException('Event category not found');
-
+@CommandHandler(CreateEventsCommand)
+export class CreateEventsHandler implements ICommandHandler<CreateEventsCommand> {
+  async execute(cmd: CreateEventsCommand): Promise<CreateEventsResponse> {
     const event = Events.create({
-      categoryId: req.categoryId,
-      title: req.title,
-      content: req.content,
-      image: req.image,
-      date: req.date,
-      address: req.address,
+      categoryId: cmd.categoryId,
+      title: cmd.title,
+      content: cmd.content,
+      image: cmd.image.path,
+      date: cmd.date,
+      address: cmd.address,
     });
     await Events.save(event);
-
-    const saved = await Events.findOne({ where: { id: event.id }, relations: ['category'] });
-    return plainToInstance(CreateEventsResponse, saved, { excludeExtraneousValues: true });
+    return plainToInstance(CreateEventsResponse, event, { excludeExtraneousValues: true });
   }
 }

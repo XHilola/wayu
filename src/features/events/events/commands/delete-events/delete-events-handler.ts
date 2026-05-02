@@ -8,7 +8,8 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 export class DeleteEventsHandler implements ICommandHandler<DeleteEventsRequest> {
   async execute(req: DeleteEventsRequest): Promise<void> {
     const event = await Events.findOneBy({ id: req.id });
-    if (!event) throw new NotFoundException('Event not found');
+    if (!event)
+      throw new NotFoundException('Event not found');
     await Events.remove(event);
   }
 }

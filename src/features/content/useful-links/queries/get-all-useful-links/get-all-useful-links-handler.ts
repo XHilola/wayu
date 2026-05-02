@@ -1,15 +1,21 @@
-import { GetAllUsefulLinksRequest } from './get-all-useful-links-request';
-import { Injectable } from '@nestjs/common';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { GetAllUsefulLinksResponse } from './get-all-useful-links-response';
 import { plainToInstance } from 'class-transformer';
+import { ConfigService } from '@nestjs/config';
 import { UsefulLinks } from '../../usefulLinks.entity';
+import { GetAllUsefulLinksRequest } from './get-all-useful-links-request';
+import { GetAllUsefulLinksResponse } from './get-all-useful-links-response';
 
-@Injectable()
 @QueryHandler(GetAllUsefulLinksRequest)
 export class GetAllUsefulLinksHandler implements IQueryHandler<GetAllUsefulLinksRequest> {
-  async execute(): Promise<GetAllUsefulLinksResponse[]> {
+  constructor(private readonly config: ConfigService) {}
+
+  async execute(query: GetAllUsefulLinksRequest): Promise<GetAllUsefulLinksResponse[]> {
     const usefulLinks = await UsefulLinks.find();
-    return plainToInstance(GetAllUsefulLinksResponse, usefulLinks, { excludeExtraneousValues: true });
+    const baseUrl = this.config.get<string>('BASE_URL');
+    return usefulLinks.map((usefulLink) => {
+      const res = plainToInstance(GetAllUsefulLinksResponse, usefulLink, { excludeExtraneousValues: true });
+      res.icon = `${baseUrl}/${usefulLink.icon}`;
+      return res;
+    });
   }
 }

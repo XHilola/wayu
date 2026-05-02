@@ -1,23 +1,15 @@
-import { Command } from '@nestjs/cqrs';
+import { Allow, IsOptional, IsString, MaxLength } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsInt, IsString, MaxLength } from 'class-validator';
-import { Expose } from 'class-transformer';
 
-export class UpdateCountriesRequest extends Command<UpdateCountriesRequest> {
-  @IsInt()
-  @ApiProperty()
-  @Expose()
-  id!: number;
-
-  @ApiProperty()
+export class UpdateCountriesRequest {
   @IsString()
+  @IsOptional()
+  @ApiProperty({ required: false })
   @MaxLength(64)
-  @Expose()
   title?: string;
 
-  @ApiProperty()
-  @IsString()
-  @MaxLength(128)
-  @Expose()
+  @Allow()
+  @IsOptional()
+  @ApiProperty({ type: 'string', format: 'binary', required: false })
   flag?: string;
 }

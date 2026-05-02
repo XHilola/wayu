@@ -28,7 +28,7 @@ export class EventCategoriesController {
 
   @Patch('patch/:id')
   @ApiOkResponse({ type: UpdateEventCategoriesResponse })
-  async update(@Param('id', ParseIntPipe) id: number, @Body() payload: EventCategories) {
+  async update(@Param('id', ParseIntPipe) id: number, @Body() payload: UpdateEventCategoriesRequest) {
     const cmd = new UpdateEventCategoriesRequest();
     cmd.id = id;
     cmd.title = payload.title;

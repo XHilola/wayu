@@ -12,7 +12,8 @@ export class UpdateEventCategoriesHandler implements ICommandHandler<UpdateEvent
     const category = await EventCategories.findOneBy({ id: req.id });
     if (!category) throw new NotFoundException('Event category not found');
 
-    if (req.title !== undefined) category.title = req.title;
+    if (req.title !== undefined)
+      category.title = req.title;
 
     await EventCategories.save(category);
     return plainToInstance(UpdateEventCategoriesResponse, category, { excludeExtraneousValues: true });

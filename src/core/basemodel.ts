@@ -4,9 +4,9 @@ export class BaseModel extends BaseEntity {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @CreateDateColumn()
-  createdAt!: Date;
+  @CreateDateColumn({type:'timestamp'})
+  createdAt!: string;
 
-  @CreateDateColumn({ nullable: true })
-  updatedAt?: Date;
+  @CreateDateColumn({ type:'timestamp',nullable: true })
+  updatedAt?: string;
 }

@@ -1,15 +1,21 @@
-import { GetAllCountriesRequest } from './get-all-countries-request';
-import { Countries } from '../../countries.entity';
-import { Injectable } from '@nestjs/common';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { GetAllCountriesResponse } from './get-all-countries-response';
 import { plainToInstance } from 'class-transformer';
+import { Countries } from '../../countries.entity';
+import { GetAllCountriesRequest } from './get-all-countries-request';
+import { GetAllCountriesResponse } from './get-all-countries-response';
+import { ConfigService } from '@nestjs/config';
 
-@Injectable()
 @QueryHandler(GetAllCountriesRequest)
 export class GetAllCountriesHandler implements IQueryHandler<GetAllCountriesRequest> {
-  async execute(): Promise<GetAllCountriesResponse[]> {
+  constructor(private readonly config: ConfigService) {}
+
+  async execute(query: GetAllCountriesRequest): Promise<GetAllCountriesResponse[]> {
     const countries = await Countries.find();
-    return plainToInstance(GetAllCountriesResponse, countries, { excludeExtraneousValues: true });
+    const baseUrl = this.config.getOrThrow<string>('BASE_URL');
+    return countries.map((country) => {
+      const res = plainToInstance(GetAllCountriesResponse, country, { excludeExtraneousValues: true });
+      res.flag = `${baseUrl}/${country.flag}`;
+      return res;
+    });
   }
 }

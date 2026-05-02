@@ -1,32 +1,30 @@
-import { IsDateString, IsInt, IsString, MaxLength } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { Command } from '@nestjs/cqrs';
+import { Allow, IsDateString, IsInt, IsString, MaxLength } from 'class-validator';
 
-export class CreateEventsRequest extends Command<CreateEventsRequest> {
-  @IsInt()
+export class CreateEventsRequest {
   @ApiProperty()
+  @IsInt()
   categoryId!: number;
 
-  @IsString()
   @ApiProperty()
+  @IsString()
   @MaxLength(256)
   title!: string;
 
-  @IsString()
   @ApiProperty()
+  @IsString()
   content!: string;
 
-  @IsString()
-  @ApiProperty()
-  @MaxLength(128)
+  @ApiProperty({ type: 'string', format: 'binary' })
+  @Allow()
   image!: string;
 
-  @IsDateString()
   @ApiProperty()
+  @IsDateString()
   date!: string;
 
-  @IsString()
   @ApiProperty()
+  @IsString()
   @MaxLength(128)
   address!: string;
 }

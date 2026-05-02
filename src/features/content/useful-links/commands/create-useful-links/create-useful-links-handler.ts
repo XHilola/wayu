@@ -1,15 +1,13 @@
-import { CreateUsefulLinksRequest } from './create-useful-links-request';
-import { Injectable } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { CreateUsefulLinksResponse } from './create-useful-links-response';
 import { plainToInstance } from 'class-transformer';
 import { UsefulLinks } from '../../usefulLinks.entity';
+import { CreateUsefulLinksCommand } from './create-useful-links-command';
+import { CreateUsefulLinksResponse } from './create-useful-links-response';
 
-@Injectable()
-@CommandHandler(CreateUsefulLinksRequest)
-export class CreateUsefulLinksHandler implements ICommandHandler<CreateUsefulLinksRequest> {
-  async execute(req: CreateUsefulLinksRequest): Promise<CreateUsefulLinksResponse> {
-    const usefulLink = UsefulLinks.create({ title: req.title, icon: req.icon, link: req.link });
+@CommandHandler(CreateUsefulLinksCommand)
+export class CreateUsefulLinksHandler implements ICommandHandler<CreateUsefulLinksCommand> {
+  async execute(cmd: CreateUsefulLinksCommand): Promise<CreateUsefulLinksResponse> {
+    const usefulLink = UsefulLinks.create({ title: cmd.title, icon: cmd.icon.path, link: cmd.link });
     await UsefulLinks.save(usefulLink);
     return plainToInstance(CreateUsefulLinksResponse, usefulLink, { excludeExtraneousValues: true });
   }

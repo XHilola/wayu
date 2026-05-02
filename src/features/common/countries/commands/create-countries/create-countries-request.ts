@@ -1,16 +1,13 @@
-import { IsString, MaxLength } from 'class-validator';
+import { Allow, IsString, MaxLength } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { Command } from '@nestjs/cqrs';
-import { Countries } from '../../countries.entity';
 
-export class CreateCountriesRequest extends Command<CreateCountriesRequest>{
+export class CreateCountriesRequest {
   @IsString()
   @ApiProperty()
   @MaxLength(64)
   title!: string;
 
-  @IsString()
-  @ApiProperty()
-  @MaxLength(128)
+  @Allow()
+  @ApiProperty({type:'string',format:'binary'})
   flag!: string;
 }

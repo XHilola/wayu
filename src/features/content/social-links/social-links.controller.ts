@@ -7,20 +7,25 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
-import { CreateSocialLinksResponse } from './commands/create-social-links/create-social-links-response';
+import { ApiConsumes, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
+import fs from 'fs';
+import { storageOptions } from '../../../config/multer.config';
+import { CreateSocialLinksCommand } from './commands/create-social-links/create-social-links-command';
 import { CreateSocialLinksRequest } from './commands/create-social-links/create-social-links-request';
-import { UpdateSocialLinksResponse } from './commands/update-social-links/update-social-links-response';
-import { SocialLinks } from './socialLinks.entity';
+import { CreateSocialLinksResponse } from './commands/create-social-links/create-social-links-response';
+import { UpdateSocialLinksCommand } from './commands/update-social-links/update-social-links-command';
 import { UpdateSocialLinksRequest } from './commands/update-social-links/update-social-links-request';
+import { UpdateSocialLinksResponse } from './commands/update-social-links/update-social-links-response';
 import { DeleteSocialLinksRequest } from './commands/delete-social-links/delete-social-links-request';
-import { GetAllSocialLinksResponse } from './queries/get-all-social-links/get-all-social-links-response';
 import { GetAllSocialLinksRequest } from './queries/get-all-social-links/get-all-social-links-request';
-import { GetOneSocialLinksResponse } from './queries/get-one-social-links/get-one-social-links-response';
+import { GetAllSocialLinksResponse } from './queries/get-all-social-links/get-all-social-links-response';
 import { GetOneSocialLinksRequest } from './queries/get-one-social-links/get-one-social-links-request';
-
+import { GetOneSocialLinksResponse } from './queries/get-one-social-links/get-one-social-links-response';
 
 @Controller('social-links/')
 export class SocialLinksController {
@@ -30,17 +35,38 @@ export class SocialLinksController {
   ) {}
 
   @Post('create')
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('icon', { storage: storageOptions, limits: { fileSize: 1024 * 1024 * 6 } }))
   @ApiCreatedResponse({ type: CreateSocialLinksResponse })
-  async create(@Body() payload: CreateSocialLinksRequest) {
-    return await this.commandBus.execute(payload);
+  async create(
+    @Body() payload: CreateSocialLinksRequest,
+    @UploadedFile() icon: Express.Multer.File,
+  ) {
+    const cmd = new CreateSocialLinksCommand(payload.title, icon, payload.link);
+    try {
+      return await this.commandBus.execute(cmd);
+    } catch (exc) {
+      if (icon && fs.existsSync(icon.path)) fs.rmSync(icon.path);
+      throw exc;
+    }
   }
 
   @Patch('patch/:id')
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('icon', { storage: storageOptions, limits: { fileSize: 1024 * 1024 * 6 } }))
   @ApiOkResponse({ type: UpdateSocialLinksResponse })
-  async update(@Param('id', ParseIntPipe) id: number, @Body() payload: SocialLinks) {
-    const cmd = new UpdateSocialLinksRequest();
-    cmd.id = id; cmd.title = payload.title; cmd.icon = payload.icon; cmd.link = payload.link;
-    return await this.commandBus.execute(cmd);
+  async update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() payload: UpdateSocialLinksRequest,
+    @UploadedFile() icon?: Express.Multer.File,
+  ) {
+    const cmd = new UpdateSocialLinksCommand(id, payload.title, icon, payload.link);
+    try {
+      return await this.commandBus.execute(cmd);
+    } catch (exc) {
+      if (icon && fs.existsSync(icon.path)) fs.rmSync(icon.path);
+      throw exc;
+    }
   }
 
   @Delete('delete/:id')

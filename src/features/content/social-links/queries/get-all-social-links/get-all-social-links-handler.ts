@@ -1,15 +1,21 @@
-import { GetAllSocialLinksRequest } from './get-all-social-links-request';
-import { Injectable } from '@nestjs/common';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { GetAllSocialLinksResponse } from './get-all-social-links-response';
 import { plainToInstance } from 'class-transformer';
+import { ConfigService } from '@nestjs/config';
 import { SocialLinks } from '../../socialLinks.entity';
+import { GetAllSocialLinksRequest } from './get-all-social-links-request';
+import { GetAllSocialLinksResponse } from './get-all-social-links-response';
 
-@Injectable()
 @QueryHandler(GetAllSocialLinksRequest)
 export class GetAllSocialLinksHandler implements IQueryHandler<GetAllSocialLinksRequest> {
-  async execute(): Promise<GetAllSocialLinksResponse[]> {
+  constructor(private readonly config: ConfigService) {}
+
+  async execute(query: GetAllSocialLinksRequest): Promise<GetAllSocialLinksResponse[]> {
     const socialLinks = await SocialLinks.find();
-    return plainToInstance(GetAllSocialLinksResponse, socialLinks, { excludeExtraneousValues: true });
+    const baseUrl = this.config.getOrThrow<string>('BASE_URL');
+    return socialLinks.map((socialLink) => {
+      const res = plainToInstance(GetAllSocialLinksResponse, socialLink, { excludeExtraneousValues: true });
+      res.icon = `${baseUrl}/${socialLink.icon}`;
+      return res;
+    });
   }
 }

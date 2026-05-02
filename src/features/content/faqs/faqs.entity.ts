@@ -1,7 +1,6 @@
 import { Column, Entity, JoinTable, ManyToMany } from 'typeorm';
 import { BaseModel } from '../../../core/basemodel';
-import { Tags } from '../../news/entities/tags.entity';
-
+import type { Tags } from '../../news/tags/tags.entity';
 
 @Entity('faqs')
 export class Faqs extends BaseModel {
@@ -13,6 +12,9 @@ export class Faqs extends BaseModel {
   answer!: string;
 
   @JoinTable({ name: 'faqsTags', joinColumn: { name: 'faqsId' }, inverseJoinColumn: { name: 'tagId' } })
-  @ManyToMany(() => Tags, (a) => a.faqs)
+  @ManyToMany(
+    () => require('../../news/tags/tags.entity').Tags,
+    (a: Tags) => a.faqs,
+  )
   tags?: Tags[];
 }

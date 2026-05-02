@@ -1,15 +1,15 @@
-import { IsString, MaxLength } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
 import { Command } from '@nestjs/cqrs';
+import { ApiProperty } from '@nestjs/swagger';
+import { Allow, IsString, MaxLength } from 'class-validator';
+import { CreateInstagramPostsResponse } from './create-instagram-posts-response';
 
-export class CreateInstagramPostsRequest extends Command<CreateInstagramPostsRequest> {
-  @IsString()
-  @ApiProperty()
-  @MaxLength(256)
+export class CreateInstagramPostsRequest{
+  @ApiProperty({ type: 'string', format: 'binary' })
+  @Allow()
   image!: string;
 
-  @IsString()
   @ApiProperty()
+  @IsString()
   @MaxLength(128)
   link!: string;
 }

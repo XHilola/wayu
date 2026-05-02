@@ -8,7 +8,8 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 export class DeleteLanguagesHandler implements ICommandHandler<DeleteLanguagesRequest> {
   async execute(req: DeleteLanguagesRequest): Promise<void> {
     const language = await Languages.findOneBy({ id: req.id });
-    if (!language) throw new NotFoundException('Language not found');
+    if (!language)
+      throw new NotFoundException('Language not found');
     await Languages.remove(language);
   }
 }

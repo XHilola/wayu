@@ -7,20 +7,25 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
-import { CreateCountriesResponse } from './commands/create-countries/create-countries-response';
+import { ApiConsumes, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
+import fs from 'fs';
+import { storageOptions } from '../../../config/multer.config';
+import { CreateCountriesCommand } from './commands/create-countries/create-countries-command';
 import { CreateCountriesRequest } from './commands/create-countries/create-countries-request';
-import { DeleteCountriesRequest } from './commands/delete-countries/delete-countries-request';
-import { UpdateCountriesResponse } from './commands/update-countries/update-countries-response';
-import { Countries } from './countries.entity';
+import { CreateCountriesResponse } from './commands/create-countries/create-countries-response';
+import { UpdateCountriesCommand } from './commands/update-countries/update-countries-command';
 import { UpdateCountriesRequest } from './commands/update-countries/update-countries-request';
-import { GetAllCountriesResponse } from './queries/get-all-countries/get-all-countries-response';
+import { UpdateCountriesResponse } from './commands/update-countries/update-countries-response';
+import { DeleteCountriesCommand } from './commands/delete-countries/delete-countries-command';
 import { GetAllCountriesRequest } from './queries/get-all-countries/get-all-countries-request';
-import { GetOneCountriesResponse } from './queries/get-one-countries/get-one-countries-response';
+import { GetAllCountriesResponse } from './queries/get-all-countries/get-all-countries-response';
 import { GetOneCountriesRequest } from './queries/get-one-countries/get-one-countries-request';
-
+import { GetOneCountriesResponse } from './queries/get-one-countries/get-one-countries-response';
 
 @Controller('countries/')
 export class CountriesController {
@@ -30,28 +35,44 @@ export class CountriesController {
   ) {}
 
   @Post('create')
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('flag', { storage: storageOptions, limits: { fileSize: 1024 * 1024 * 6 } }))
   @ApiCreatedResponse({ type: CreateCountriesResponse })
-  async create(@Body() payload: CreateCountriesRequest) {
-    return await this.commandBus.execute(payload);
+  async create(
+    @Body() payload: CreateCountriesRequest,
+    @UploadedFile() flag: Express.Multer.File,
+  ) {
+    const cmd = new CreateCountriesCommand(payload.title, flag);
+    try {
+      return await this.commandBus.execute(cmd);
+    } catch (exc) {
+      if (fs.existsSync(flag.path)) fs.rmSync(flag.path);
+      throw exc;
+    }
+  }
+
+  @Patch('patch/:id')
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('flag', { storage: storageOptions, limits: { fileSize: 1024 * 1024 * 6 } }))
+  @ApiOkResponse({ type: UpdateCountriesResponse })
+  async update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() payload: UpdateCountriesRequest,
+    @UploadedFile() flag?: Express.Multer.File,
+  ) {
+    const cmd = new UpdateCountriesCommand(id, payload.title, flag);
+    try {
+      return await this.commandBus.execute(cmd);
+    } catch (exc) {
+      if (flag && fs.existsSync(flag.path)) fs.rmSync(flag.path);
+      throw exc;
+    }
   }
 
   @Delete('delete/:id')
   async delete(@Param('id', ParseIntPipe) id: number) {
-    const cmd = new DeleteCountriesRequest();
+    const cmd = new DeleteCountriesCommand();
     cmd.id = id;
-    return await this.commandBus.execute(cmd);
-  }
-
-  @Patch('patch/:id')
-  @ApiOkResponse({ type: UpdateCountriesResponse })
-  async update(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() payload: Countries,
-  ) {
-    const cmd = new UpdateCountriesRequest();
-    cmd.id = id;
-    cmd.title = payload.title;
-    cmd.flag = payload.flag;
     return await this.commandBus.execute(cmd);
   }
 

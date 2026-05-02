@@ -21,8 +21,8 @@
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
-    "rules": {
-      "@typescript-eslint/no-unsafe-call": "off"
-    }
+//    "rules": {
+//      "@typescript-eslint/no-unsafe-call": "off"
+//    }
   }
 }

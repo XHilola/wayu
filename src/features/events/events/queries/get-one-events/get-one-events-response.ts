@@ -7,14 +7,28 @@ class CategoryResponse {
   @Expose() @ApiProperty() title!: string;
 }
 
-export class GetOneEventsResponse extends Query<GetOneEventsResponse> {
-  @Expose() @ApiProperty() id!: number;
-  @Expose() @ApiProperty() categoryId!: number;
-  @Expose() @ApiProperty() title!: string;
-  @Expose() @ApiProperty() content!: string;
-  @Expose() @ApiProperty() image!: string;
-  @Expose() @ApiProperty() date!: string;
-  @Expose() @ApiProperty() address!: string;
+export class GetOneEventsResponse{
+  @Expose()
+  @ApiProperty()
+  id!: number;
+  @Expose()
+  @ApiProperty()
+  categoryId!: number;
+  @Expose()
+  @ApiProperty()
+  title!: string;
+  @Expose()
+  @ApiProperty()
+  content!: string;
+  @Expose()
+  @ApiProperty()
+  image!: string;
+  @Expose()
+  @ApiProperty()
+  date!: string;
+  @Expose()
+  @ApiProperty()
+  address!: string;
 
   @Expose()
   @ApiProperty({ type: CategoryResponse })

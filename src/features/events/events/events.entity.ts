@@ -1,5 +1,5 @@
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
-import { EventCategories } from '../event-categories/eventCategories.entity';
+import type { EventCategories } from '../event-categories/eventCategories.entity';
 import { BaseModel } from '../../../core/basemodel';
 
 @Entity('events')
@@ -24,6 +24,9 @@ export class Events extends BaseModel {
   address!: string;
 
   @JoinColumn({ name: 'categoryId' })
-  @ManyToOne(() => EventCategories, (a) => a.events)
+  @ManyToOne(
+    () => require('../event-categories/eventCategories.entity').EventCategories,
+    (a: EventCategories) => a.events,
+  )
   category?: EventCategories;
 }

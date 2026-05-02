@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 import { Query } from '@nestjs/cqrs';
 
-export class GetAllInstagramPostsResponse extends Query<GetAllInstagramPostsResponse> {
+export class GetAllInstagramPostsResponse {
   @Expose()
   @ApiProperty()
   id!: number;

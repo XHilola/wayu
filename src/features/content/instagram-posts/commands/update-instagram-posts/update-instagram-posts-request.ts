@@ -1,19 +1,19 @@
-import { IsOptional, IsString, MaxLength } from 'class-validator';
-import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Command } from '@nestjs/cqrs';
+import { ApiProperty } from '@nestjs/swagger';
+import { Allow, IsOptional, IsString, MaxLength } from 'class-validator';
+import { UpdateInstagramPostsResponse } from './update-instagram-posts-response';
 
-export class UpdateInstagramPostsRequest extends Command<UpdateInstagramPostsRequest> {
+export class UpdateInstagramPostsRequest extends Command<UpdateInstagramPostsResponse> {
   id!: number;
 
+  @ApiProperty({ type: 'string', format: 'binary', required: false })
+  @Allow()
   @IsOptional()
-  @IsString()
-  @ApiPropertyOptional()
-  @MaxLength(256)
   image?: string;
 
-  @IsOptional()
+  @ApiProperty({ required: false })
   @IsString()
-  @ApiPropertyOptional()
+  @IsOptional()
   @MaxLength(128)
   link?: string;
 }

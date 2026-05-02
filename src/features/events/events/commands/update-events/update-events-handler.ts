@@ -1,33 +1,32 @@
-import { UpdateEventsRequest } from './update-events-request';
-import { Events } from '../../events.entity';
-import { EventCategories } from '../../../event-categories/eventCategories.entity';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { NotFoundException } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { UpdateEventsResponse } from './update-events-response';
 import { plainToInstance } from 'class-transformer';
+import fs from 'fs';
+import { Events } from '../../events.entity';
+import { UpdateEventsCommand } from './update-events-command';
+import { UpdateEventsResponse } from './update-events-response';
 
-@Injectable()
-@CommandHandler(UpdateEventsRequest)
-export class UpdateEventsHandler implements ICommandHandler<UpdateEventsRequest> {
-  async execute(req: UpdateEventsRequest): Promise<UpdateEventsResponse> {
-    const event = await Events.findOne({ where: { id: req.id }, relations: ['category'] });
+@CommandHandler(UpdateEventsCommand)
+export class UpdateEventsHandler implements ICommandHandler<UpdateEventsCommand> {
+  async execute(cmd: UpdateEventsCommand): Promise<UpdateEventsResponse> {
+    const event = await Events.findOneBy({ id: cmd.id });
     if (!event) throw new NotFoundException('Event not found');
-
-    if (req.categoryId !== undefined) {
-      const category = await EventCategories.findOneBy({ id: req.categoryId });
-      if (!category) throw new NotFoundException('Event category not found');
-      event.categoryId = req.categoryId;
+    if (cmd.categoryId)
+      event.categoryId = cmd.categoryId;
+    if (cmd.title)
+      event.title = cmd.title;
+    if (cmd.content)
+      event.content= cmd.content;
+    if (cmd.date)
+      event.date = cmd.date;
+    if (cmd.address)
+      event.address= cmd.address;
+    if (cmd.image) {
+      if (event.image && fs.existsSync(event.image))
+        fs.rmSync(event.image);
+      event.image = cmd.image.path;
     }
-
-    if (req.title   !== undefined) event.title   = req.title;
-    if (req.content !== undefined) event.content = req.content;
-    if (req.image   !== undefined) event.image   = req.image;
-    if (req.date    !== undefined) event.date    = req.date;
-    if (req.address !== undefined) event.address = req.address;
-
     await Events.save(event);
-
-    const updated = await Events.findOne({ where: { id: event.id }, relations: ['category'] });
-    return plainToInstance(UpdateEventsResponse, updated, { excludeExtraneousValues: true });
+    return plainToInstance(UpdateEventsResponse, event, { excludeExtraneousValues: true });
   }
 }

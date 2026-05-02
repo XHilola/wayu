@@ -10,9 +10,11 @@ import { plainToInstance } from 'class-transformer';
 export class UpdateLanguagesHandler implements ICommandHandler<UpdateLanguagesRequest> {
   async execute(req: UpdateLanguagesRequest): Promise<UpdateLanguagesResponse> {
     const language = await Languages.findOneBy({ id: req.id });
-    if (!language) throw new NotFoundException('Language not found');
+    if (!language)
+      throw new NotFoundException('Language not found');
 
-    if (req.title !== undefined) language.title = req.title;
+    if (req.title !== undefined)
+      language.title = req.title;
 
     await Languages.save(language);
     return plainToInstance(UpdateLanguagesResponse, language, { excludeExtraneousValues: true });

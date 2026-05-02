@@ -1,8 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
-import { Query } from '@nestjs/cqrs';
 
-export class GetAllCountriesResponse extends Query<GetAllCountriesResponse> {
+export class GetAllCountriesResponse {
   @Expose()
   @ApiProperty()
   id!: number;

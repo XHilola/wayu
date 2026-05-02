@@ -1,20 +1,18 @@
-import { IsString, MaxLength } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { Command } from '@nestjs/cqrs';
+import { Allow, IsString, MaxLength } from 'class-validator';
 
-export class CreateSocialLinksRequest extends Command<CreateSocialLinksRequest> {
-  @IsString()
+export class CreateSocialLinksRequest {
   @ApiProperty()
+  @IsString()
   @MaxLength(64)
   title!: string;
 
-  @IsString()
-  @ApiProperty()
-  @MaxLength(128)
+  @ApiProperty({ type: 'string', format: 'binary' })
+  @Allow()
   icon!: string;
 
-  @IsString()
   @ApiProperty()
+  @IsString()
   @MaxLength(128)
   link!: string;
 }
