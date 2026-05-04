@@ -1,15 +1,61 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
-import { GetAllNewsCategoriesResponse } from './queries/getAll-news-categories/getAll-news-categories-response';
-import { GetAllNewsCategoriesRequest } from './queries/getAll-news-categories/getAll-news-categories-request';
-import { GetOneNewsCategoriesResponse } from './queries/getOne-news-categories/getOne-news-categories-response';
-import { GetOneNewsCategoriesRequest } from './queries/getOne-news-categories/getOne-news-categories-request';
-import { CreateNewsCategoriesResponse } from './commands/create-news-categories/create-news-categories-response';
-import { CreateNewsCategoriesRequest } from './commands/create-news-categories/create-news-categories-request';
-import { UpdateNewsCategoriesResponse } from './commands/update-news-categories/update-news-categories-response';
-import { UpdateNewsCategoriesRequest } from './commands/update-news-categories/update-news-categories-request';
-import { DeleteNewsCategoriesRequest } from './commands/delete-news-categories/delete-news-categories-request';
+import { GetAllNewsCategoriesXResponse } from './admin/getAll-news-categories-x/getAll-news-categories-x-response';
+import { GetAllNewsCategoriesXRequest } from './admin/getAll-news-categories-x/getAll-news-categories-x-request';
+import { GetOneNewsCategoriesXResponse } from './admin/getOne-news-categories-x/getOne-news-categories-x-response';
+import { GetOneNewsCategoriesXRequest } from './admin/getOne-news-categories-x/getOne-news-categories-x-request';
+import { CreateNewsCategoriesXResponse } from './admin/create-news-categories-x/create-news-categories-x-response';
+import { CreateNewsCategoriesXRequest } from './admin/create-news-categories-x/create-news-categories-x-request';
+import { UpdateNewsCategoriesXResponse } from './admin/update-news-categories-x/update-news-categories-x-response';
+import { UpdateNewsCategoriesXRequest } from './admin/update-news-categories-x/update-news-categories-x-request';
+import { DeleteNewsCategoriesXRequest } from './admin/delete-news-categories-x/delete-news-categories-x-request';
+
+
+@Controller('news-categories/admin')
+export class NewsCategoriesXController {
+  constructor(
+    private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus,
+  ) {}
+
+  @Get()
+  @ApiOkResponse({ type: GetAllNewsCategoriesXResponse })
+  async getAll() {
+    return await this.queryBus.execute(new GetAllNewsCategoriesXRequest());
+  }
+
+  @Get('/:id')
+  @ApiOkResponse({ type: GetOneNewsCategoriesXResponse })
+  async getOne(@Param('id') id: number) {
+    const query = new GetOneNewsCategoriesXRequest();
+    query.id = id;
+    return await this.queryBus.execute(query);
+  }
+
+  @Post()
+  @ApiCreatedResponse({ type: CreateNewsCategoriesXResponse })
+  async create(@Body() payload: CreateNewsCategoriesXRequest) {
+    return await this.commandBus.execute(payload);
+  }
+
+  @Patch('/:id')
+  @ApiOkResponse({ type: UpdateNewsCategoriesXResponse })
+  async update(@Param('id') id: number, @Body() payload: UpdateNewsCategoriesXRequest) {
+    const cmd = new UpdateNewsCategoriesXRequest();
+    cmd.id = id;
+    cmd.title = payload.title;
+    return await this.commandBus.execute(cmd);
+  }
+
+  @Delete('/:id')
+  @ApiOkResponse()
+  async delete(@Param('id') id: number) {
+    const cmd = new DeleteNewsCategoriesXRequest();
+    cmd.id = id;
+    return await this.commandBus.execute(cmd);
+  }
+}
 
 @Controller('news-categories')
 export class NewsCategoriesController {
@@ -19,39 +65,17 @@ export class NewsCategoriesController {
   ) {}
 
   @Get()
-  @ApiOkResponse({ type: GetAllNewsCategoriesResponse })
+  @ApiOkResponse({ type: GetAllNewsCategoriesXResponse })
   async getAll() {
-    return await this.queryBus.execute(new GetAllNewsCategoriesRequest());
+    return await this.queryBus.execute(new GetAllNewsCategoriesXRequest());
   }
 
   @Get('/:id')
-  @ApiOkResponse({ type: GetOneNewsCategoriesResponse })
+  @ApiOkResponse({ type: GetOneNewsCategoriesXResponse })
   async getOne(@Param('id') id: number) {
-    const query = new GetOneNewsCategoriesRequest();
+    const query = new GetOneNewsCategoriesXRequest();
     query.id = id;
     return await this.queryBus.execute(query);
   }
 
-  @Post()
-  @ApiCreatedResponse({ type: CreateNewsCategoriesResponse })
-  async create(@Body() payload: CreateNewsCategoriesRequest) {
-    return await this.commandBus.execute(payload);
-  }
-
-  @Patch('/:id')
-  @ApiOkResponse({ type: UpdateNewsCategoriesResponse })
-  async update(@Param('id') id: number, @Body() payload: UpdateNewsCategoriesRequest) {
-    const cmd = new UpdateNewsCategoriesRequest();
-    cmd.id = id;
-    cmd.title = payload.title;
-    return await this.commandBus.execute(cmd);
-  }
-
-  @Delete('/:id')
-  @ApiOkResponse()
-  async delete(@Param('id') id: number) {
-    const cmd = new DeleteNewsCategoriesRequest();
-    cmd.id = id;
-    return await this.commandBus.execute(cmd);
-  }
 }

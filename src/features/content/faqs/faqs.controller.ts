@@ -1,25 +1,20 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  ParseIntPipe,
-  Patch,
-  Post,
-} from '@nestjs/common';
-import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
+import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
+import { CreateFaqsResponse } from './public/create-faqs/create-faqs-response';
+import { CreateFaqsRequest } from './public/create-faqs/create-faqs-request';
+import { UpdateFaqsResponse } from './public/update-faqs/update-faqs-response';
+import { UpdateFaqsRequest } from './public/update-faqs/update-faqs-request';
+import { DeleteFaqsRequest } from './public/delete-faqs/delete-faqs-request';
+import { GetAllFaqsResponse } from './public/get-all-faqs/get-all-faqs-response';
+import { GetAllFaqsRequest } from './public/get-all-faqs/get-all-faqs-request';
+import { GetOneFaqsResponse } from './public/get-one-faqs/get-one-faqs-response';
+import { GetOneFaqsRequest } from './public/get-one-faqs/get-one-faqs-request';
+import { GetAllFaqsXResponse } from './admin/get-all-faqs-x/get-all-faqs-x-response';
+import { GetAllFaqsXRequest } from './admin/get-all-faqs-x/get-all-faqs-x-request';
+import { GetOneFaqsXResponse } from './admin/get-one-faqs-x/get-one-faqs-x-response';
+import { GetOneFaqsXRequest } from './admin/get-one-faqs-x/get-one-faqs-x-request';
 
-import { CreateFaqsRequest } from './commands/create-faqs/create-faqs-request';
-import { CreateFaqsResponse } from './commands/create-faqs/create-faqs-response';
-import { UpdateFaqsRequest } from './commands/update-faqs/update-faqs-request';
-import { UpdateFaqsResponse } from './commands/update-faqs/update-faqs-response';
-import { DeleteFaqsRequest } from './commands/delete-faqs/delete-faqs-request';
-import { GetAllFaqsRequest } from './queries/get-all-faqs/get-all-faqs-request';
-import { GetAllFaqsResponse } from './queries/get-all-faqs/get-all-faqs-response';
-import { GetOneFaqsRequest } from './queries/get-one-faqs/get-one-faqs-request';
-import { GetOneFaqsResponse } from './queries/get-one-faqs/get-one-faqs-response';
 
 @Controller('faqs/')
 export class FaqsController {
@@ -65,6 +60,29 @@ export class FaqsController {
   @ApiOkResponse({ type: GetOneFaqsResponse })
   async getOne(@Param('id', ParseIntPipe) id: number) {
     const query = new GetOneFaqsRequest();
+    query.id = id;
+    return await this.queryBus.execute(query);
+  }
+}
+
+@Controller('faqs/admin')
+export class FaqsXController {
+  constructor(
+    private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus,
+  ) {
+  }
+
+  @Get()
+  @ApiOkResponse({ type: [GetAllFaqsXResponse] })
+  async getAll() {
+    return await this.queryBus.execute(new GetAllFaqsXRequest());
+  }
+
+  @Get(':id')
+  @ApiOkResponse({ type: GetOneFaqsXResponse })
+  async getOne(@Param('id', ParseIntPipe) id: number) {
+    const query = new GetOneFaqsXRequest();
     query.id = id;
     return await this.queryBus.execute(query);
   }

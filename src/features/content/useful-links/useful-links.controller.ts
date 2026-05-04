@@ -1,8 +1,8 @@
+import { CreateUsefulLinksXResponse } from './admin/create-useful-links-x/create-useful-links-x-response';
 import {
   Body,
   Controller,
-  Delete,
-  Get,
+  Delete, Get,
   Param,
   ParseIntPipe,
   Patch,
@@ -13,22 +13,25 @@ import {
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiConsumes, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
-import fs from 'fs';
 import { storageOptions } from '../../../config/multer.config';
-import { CreateUsefulLinksCommand } from './commands/create-useful-links/create-useful-links-command';
-import { CreateUsefulLinksRequest } from './commands/create-useful-links/create-useful-links-request';
-import { CreateUsefulLinksResponse } from './commands/create-useful-links/create-useful-links-response';
-import { UpdateUsefulLinksCommand } from './commands/update-useful-links/update-useful-links-command';
-import { UpdateUsefulLinksRequest } from './commands/update-useful-links/update-useful-links-request';
-import { UpdateUsefulLinksResponse } from './commands/update-useful-links/update-useful-links-response';
-import { DeleteUsefulLinksRequest } from './commands/delete-useful-links/delete-useful-links-request';
-import { GetAllUsefulLinksRequest } from './queries/get-all-useful-links/get-all-useful-links-request';
-import { GetAllUsefulLinksResponse } from './queries/get-all-useful-links/get-all-useful-links-response';
-import { GetOneUsefulLinksRequest } from './queries/get-one-useful-links/get-one-useful-links-request';
-import { GetOneUsefulLinksResponse } from './queries/get-one-useful-links/get-one-useful-links-response';
+import { CreateUsefulLinksXRequest } from './admin/create-useful-links-x/create-useful-links-x-request';
+import { CreateUsefulLinksXCommand } from './admin/create-useful-links-x/create-useful-links-x-command';
+import fs from 'fs';
+import { UpdateUsefulLinksXResponse } from './admin/update-useful-links-x/update-useful-links-x-response';
+import { UpdateUsefulLinksXRequest } from './admin/update-useful-links-x/update-useful-links-x-request';
+import { UpdateUsefulLinksXCommand } from './admin/update-useful-links-x/update-useful-links-x-command';
+import { DeleteUsefulLinksXRequest } from './admin/delete-useful-links-x/delete-useful-links-x-request';
+import { GetAllUsefulLinksXResponse } from './admin/get-all-useful-links-x/get-all-useful-links-x-response';
+import { GetAllUsefulLinksXRequest } from './admin/get-all-useful-links-x/get-all-useful-links-x-request';
+import { GetOneUsefulLinksXResponse } from './admin/get-one-useful-links-x/get-one-useful-links-x-response';
+import { GetOneUsefulLinksXRequest } from './admin/get-one-useful-links-x/get-one-useful-links-x-request';
+import { GetAllUsefulLinksResponse } from './public/get-all-useful-links/get-all-useful-links-response';
+import { GetAllUsefulLinksRequest } from './public/get-all-useful-links/get-all-useful-links-request';
+import { GetOneUsefulLinksResponse } from './public/get-one-useful-links/get-one-useful-links-response';
+import { GetOneUsefulLinksRequest } from './public/get-one-useful-links/get-one-useful-links-request';
 
-@Controller('useful-links/')
-export class UsefulLinksController {
+@Controller('useful-links/admin')
+export class UsefulLinksXController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
@@ -37,12 +40,12 @@ export class UsefulLinksController {
   @Post('create')
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('icon', { storage: storageOptions, limits: { fileSize: 1024 * 1024 * 6 } }))
-  @ApiCreatedResponse({ type: CreateUsefulLinksResponse })
+  @ApiCreatedResponse({ type: CreateUsefulLinksXResponse })
   async create(
-    @Body() payload: CreateUsefulLinksRequest,
+    @Body() payload: CreateUsefulLinksXRequest,
     @UploadedFile() icon: Express.Multer.File,
   ) {
-    const cmd = new CreateUsefulLinksCommand(payload.title, icon, payload.link);
+    const cmd = new CreateUsefulLinksXCommand(payload.title, icon, payload.link);
     try {
       return await this.commandBus.execute(cmd);
     } catch (exc) {
@@ -54,13 +57,13 @@ export class UsefulLinksController {
   @Patch('patch/:id')
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('icon', { storage: storageOptions, limits: { fileSize: 1024 * 1024 * 6 } }))
-  @ApiOkResponse({ type: UpdateUsefulLinksResponse })
+  @ApiOkResponse({ type: UpdateUsefulLinksXResponse })
   async update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() payload: UpdateUsefulLinksRequest,
+    @Body() payload: UpdateUsefulLinksXRequest,
     @UploadedFile() icon?: Express.Multer.File,
   ) {
-    const cmd = new UpdateUsefulLinksCommand(id, payload.title, icon, payload.link);
+    const cmd = new UpdateUsefulLinksXCommand(id, payload.title, icon, payload.link);
     try {
       return await this.commandBus.execute(cmd);
     } catch (exc) {
@@ -71,10 +74,32 @@ export class UsefulLinksController {
 
   @Delete('delete/:id')
   async delete(@Param('id', ParseIntPipe) id: number) {
-    const cmd = new DeleteUsefulLinksRequest();
+    const cmd = new DeleteUsefulLinksXRequest();
     cmd.id = id;
     return await this.commandBus.execute(cmd);
   }
+
+  @Get()
+  @ApiOkResponse({ type: [GetAllUsefulLinksXResponse] })
+  async getAll() {
+    return await this.queryBus.execute(new GetAllUsefulLinksXRequest());
+  }
+
+  @Get(':id')
+  @ApiOkResponse({ type: GetOneUsefulLinksXResponse })
+  async getOne(@Param('id', ParseIntPipe) id: number) {
+    const query = new GetOneUsefulLinksXRequest();
+    query.id = id;
+    return await this.queryBus.execute(query);
+  }
+}
+
+@Controller('useful-links/')
+export class UsefulLinksController {
+  constructor(
+    private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus,
+  ) {}
 
   @Get()
   @ApiOkResponse({ type: [GetAllUsefulLinksResponse] })

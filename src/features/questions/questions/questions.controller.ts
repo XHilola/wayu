@@ -1,15 +1,20 @@
+import { GetOneQuestionsResponse } from './public/getOne-expenses/getOne-expenses-response';
 import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
-import { GetAllQuestionsRequest } from './queries/getAll-questions/getAll-expenses-request';
-import { GetAllQuestionsResponse } from './queries/getAll-questions/getAll-expenses-response';
-import { GetOneQuestionsResponse } from './queries/getOne-expenses/getOne-expenses-response';
-import { GetOneQuestionsRequest } from './queries/getOne-expenses/getOne-expenses-request';
-import { CreateQuestionsResponse } from './commands/create-questions/create-questions-response';
-import { CreateQuestionsRequest } from './commands/create-questions/create-questions-request';
-import { UpdateQuestionsResponse } from './commands/update-questions/update-questions-response';
-import { UpdateQuestionsRequest } from './commands/update-questions/update-questions-request';
-import { DeleteQuestionsRequest } from './commands/delete-questions/delete-questions-request';
+import { GetAllQuestionsResponse } from './public/getAll-questions/getAll-expenses-response';
+import { GetAllQuestionsRequest } from './public/getAll-questions/getAll-expenses-request';
+import { GetOneQuestionsRequest } from './public/getOne-expenses/getOne-expenses-request';
+import { CreateQuestionsResponse } from './public/create-questions/create-questions-response';
+import { CreateQuestionsRequest } from './public/create-questions/create-questions-request';
+import { UpdateQuestionsResponse } from './public/update-questions/update-questions-response';
+import { UpdateQuestionsRequest } from './public/update-questions/update-questions-request';
+import { DeleteQuestionsRequest } from './public/delete-questions/delete-questions-request';
+import { GetAllQuestionsXResponse } from './admin/getAll-questions-X/getAll-expenses-x-response';
+import { GetAllQuestionsXRequest } from './admin/getAll-questions-X/getAll-expenses-x-request';
+import { GetOneQuestionsXResponse } from './admin/getOne-expenses-x/getOne-expenses-x-response';
+import { GetOneQuestionsXRequest } from './admin/getOne-expenses-x/getOne-expenses-x-request';
+
 
 @Controller('questions')
 export class QuestionsController {
@@ -56,5 +61,26 @@ export class QuestionsController {
     const cmd = new DeleteQuestionsRequest();
     cmd.id = id;
     return await this.commandBus.execute(cmd);
+  }
+}
+@Controller('questions/admin')
+export class QuestionsXController {
+  constructor(
+    private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus,
+  ) {}
+
+  @Get()
+  @ApiOkResponse({ type: GetAllQuestionsXResponse })
+  async getAll() {
+    return await this.queryBus.execute(new GetAllQuestionsXRequest());
+  }
+
+  @Get('/:id')
+  @ApiOkResponse({ type: GetOneQuestionsXResponse })
+  async getOne(@Param('id') id: number) {
+    const query = new GetOneQuestionsXRequest();
+    query.id = id;
+    return await this.queryBus.execute(query);
   }
 }

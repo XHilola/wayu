@@ -1,15 +1,68 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
+import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
-import { GetAllExpensesRequest } from './queries/getAll-expenses/getAll-expenses-request';
-import { GetAllExpensesResponse } from './queries/getAll-expenses/getAll-expenses-response';
-import { GetOneExpensesRequest } from './queries/getOne-expenses/getOne-expenses-request';
-import { GetOneExpensesResponse } from './queries/getOne-expenses/getOne-expenses-response';
-import { CreateExpensesRequest } from './commands/create-expenses/create-expenses-request';
-import { CreateExpensesResponse } from './commands/create-expenses/create-expenses-response';
-import { UpdateExpensesRequest } from './commands/update-expenses/update-expenses-request';
-import { UpdateExpensesResponse } from './commands/update-expenses/update-expenses-response';
-import { DeleteExpensesRequest } from './commands/delete-expenses/delete-expenses-request';
+import { GetAllExpensesXResponse } from './admin/getAll-expenses-x/getAll-expenses-x-response';
+import { GetAllExpensesXRequest } from './admin/getAll-expenses-x/getAll-expenses-x-request';
+import { GetOneExpensesXResponse } from './admin/getOne-expenses-x/getOne-expenses-x-response';
+import { GetOneExpensesXRequest } from './admin/getOne-expenses-x/getOne-expenses-x-request';
+import { CreateExpensesXResponse } from './admin/create-expenses-x/create-expenses-x-response';
+import { CreateExpensesXRequest } from './admin/create-expenses-x/create-expenses-x-request';
+import { UpdateExpensesXResponse } from './admin/update-expenses-x/update-expenses-x-response';
+import { UpdateExpensesXRequest } from './admin/update-expenses-x/update-expenses-x-request';
+import { DeleteExpensesXRequest } from './admin/delete-expenses-x/delete-expenses-x-request';
+import { GetAllExpensesResponse } from './public/getAll-expenses/getAll-expenses-response';
+import { GetAllExpensesRequest } from './public/getAll-expenses/getAll-expenses-request';
+import { GetOneExpensesResponse } from './public/getOne-expenses/getOne-expenses-response';
+import { GetOneExpensesRequest } from './public/getOne-expenses/getOne-expenses-request';
+
+@Controller('expenses/admin')
+export class ExpensesXController {
+  constructor(
+    private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus,
+  ) {}
+
+  @Get()
+  @ApiOkResponse({ type: GetAllExpensesXResponse })
+  async getAll() {
+    return await this.queryBus.execute(new GetAllExpensesXRequest());
+  }
+
+  @Get('/:id')
+  @ApiOkResponse({ type: GetOneExpensesXResponse })
+  async getOne(@Param('id') id: number) {
+    const query = new GetOneExpensesXRequest();
+    query.id = id;
+    return await this.queryBus.execute(query);
+  }
+
+  @Post()
+  @ApiCreatedResponse({ type: CreateExpensesXResponse })
+  async create(@Body() payload: CreateExpensesXRequest) {
+    return await this.commandBus.execute(payload);
+  }
+
+  @Patch('/:id')
+  @ApiOkResponse({ type: UpdateExpensesXResponse })
+  async update(@Param('id') id: number, @Body() payload: UpdateExpensesXRequest) {
+    const cmd = new UpdateExpensesXRequest();
+    cmd.id = id;
+    cmd.amount = payload.amount;
+    cmd.date = payload.date;
+    cmd.title = payload.title;
+    cmd.description = payload.description;
+    cmd.transactionId = payload.transactionId;
+    return await this.commandBus.execute(cmd);
+  }
+
+  @Delete('/:id')
+  @ApiOkResponse()
+  async delete(@Param('id') id: number) {
+    const cmd = new DeleteExpensesXRequest();
+    cmd.id = id;
+    return await this.commandBus.execute(cmd);
+  }
+}
 
 @Controller('expenses')
 export class ExpensesController {
@@ -30,32 +83,5 @@ export class ExpensesController {
     const query = new GetOneExpensesRequest();
     query.id = id;
     return await this.queryBus.execute(query);
-  }
-
-  @Post()
-  @ApiCreatedResponse({ type: CreateExpensesResponse })
-  async create(@Body() payload: CreateExpensesRequest) {
-    return await this.commandBus.execute(payload);
-  }
-
-  @Patch('/:id')
-  @ApiOkResponse({ type: UpdateExpensesResponse })
-  async update(@Param('id') id: number, @Body() payload: UpdateExpensesRequest) {
-    const cmd = new UpdateExpensesRequest();
-    cmd.id = id;
-    cmd.amount = payload.amount;
-    cmd.date = payload.date;
-    cmd.title = payload.title;
-    cmd.description = payload.description;
-    cmd.transactionId = payload.transactionId;
-    return await this.commandBus.execute(cmd);
-  }
-
-  @Delete('/:id')
-  @ApiOkResponse()
-  async delete(@Param('id') id: number) {
-    const cmd = new DeleteExpensesRequest();
-    cmd.id = id;
-    return await this.commandBus.execute(cmd);
   }
 }

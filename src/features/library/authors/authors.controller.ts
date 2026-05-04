@@ -1,16 +1,65 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { GetAllAuthorsRequest } from './queries/getAll-authors/getAll-authors-request';
-import { GetOneAuthorsRequest } from './queries/getOne-authors/getOne-authors-request';
-import { CreateAuthorsRequest } from './commands/create-authors/create-authors-request';
 import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
-import { GetAllAuthorsResponse } from './queries/getAll-authors/getAll-authors-response';
-import { GetOneAuthorsResponse } from './queries/getOne-authors/getOne-authors-response';
-import { CreateAuthorsResponse } from './commands/create-authors/create-authors-response';
-import { UpdateAuthorResponse } from './commands/update-authors/update-author-response';
-import { UpdateAuthorRequest } from './commands/update-authors/update-author-request';
-import { DeleteAuthorsRequest } from './commands/delete-authors/delete-authors-request';
+import { GetAllAuthorsXResponse } from './admin/getAll-authors-x/getAll-authors-x-response';
+import { GetAllAuthorsXRequest } from './admin/getAll-authors-x/getAll-authors-x-request';
+import { GetOneAuthorsXResponse } from './admin/getOne-authors-x/getOne-authors-x-response';
+import { GetOneAuthorsXRequest } from './admin/getOne-authors-x/getOne-authors-x-request';
+import { CreateAuthorsXResponse } from './admin/create-authors-x/create-authors-x-response';
+import { CreateAuthorsXRequest } from './admin/create-authors-x/create-authors-x-request';
+import { UpdateAuthorXResponse } from './admin/update-authors-x/update-author-x-response';
+import { UpdateAuthorXRequest } from './admin/update-authors-x/update-author-x-request';
+import { DeleteAuthorsXRequest } from './admin/delete-authors-x/delete-authors-x-request';
+import { GetAllAuthorsResponse } from './public/getAll-authors/getAll-authors-response';
+import { GetAllAuthorsRequest } from './public/getAll-authors/getAll-authors-request';
+import { GetOneAuthorsResponse } from './public/getOne-authors/getOne-authors-response';
+import { GetOneAuthorsRequest } from './public/getOne-authors/getOne-authors-request';
 
+@Controller('authors/admin')
+export class AuthorsXController {
+  constructor(
+    private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus,
+  ) {
+  }
+
+  @Get()
+  @ApiOkResponse({type:GetAllAuthorsXResponse})
+  async getAll() {
+    return await this.queryBus.execute(new GetAllAuthorsXRequest())
+  }
+
+  @Get('/:id')
+  @ApiOkResponse({type:GetOneAuthorsXResponse})
+  async getOne(@Param('id') id:number){
+    const author=new GetOneAuthorsXRequest()
+    author.id=id
+    return await this.queryBus.execute(author)
+  }
+
+  @Post()
+  @ApiCreatedResponse({type:CreateAuthorsXResponse})
+  async create(@Body() payload:CreateAuthorsXRequest){
+    return await this.commandBus.execute(payload)
+  }
+
+  @Patch('/:id')
+  @ApiOkResponse({type:UpdateAuthorXResponse})
+  async update(@Param('id') id:number,@Body() payload:UpdateAuthorXRequest){
+    const cmd=new UpdateAuthorXRequest()
+    cmd.id=id
+    cmd.fullName=payload.fullName
+    return await this.commandBus.execute(cmd)
+  }
+
+  @Delete('/:id')
+  @ApiOkResponse()
+  async delete(@Param("id") id:number){
+    const cmd=new DeleteAuthorsXRequest()
+    cmd.id=id
+    return await this.commandBus.execute(cmd)
+  }
+}
 @Controller('authors')
 export class AuthorsController {
   constructor(
@@ -31,28 +80,5 @@ export class AuthorsController {
     const author=new GetOneAuthorsRequest()
     author.id=id
     return await this.queryBus.execute(author)
-  }
-
-  @Post()
-  @ApiCreatedResponse({type:CreateAuthorsResponse})
-  async create(@Body() payload:CreateAuthorsRequest){
-    return await this.commandBus.execute(payload)
-  }
-
-  @Patch('/:id')
-  @ApiOkResponse({type:UpdateAuthorResponse})
-  async update(@Param('id') id:number,@Body() payload:UpdateAuthorRequest){
-    const cmd=new UpdateAuthorRequest()
-    cmd.id=id
-    cmd.fullName=payload.fullName
-    return await this.commandBus.execute(cmd)
-  }
-
-  @Delete('/:id')
-  @ApiOkResponse()
-  async delete(@Param("id") id:number){
-    const cmd=new DeleteAuthorsRequest()
-    cmd.id=id
-    return await this.commandBus.execute(cmd)
   }
 }

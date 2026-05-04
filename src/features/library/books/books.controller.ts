@@ -1,3 +1,4 @@
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import {
   Body,
   Controller,
@@ -9,25 +10,28 @@ import {
   UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
-import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiConsumes, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { storageOptions } from '../../../config/multer.config';
-import { CreateBooksResponse } from './commands/create-books/create-books-response';
-import { CreateBooksRequest } from './commands/create-books/create-books-request';
-import { CreateBooksCommand } from './commands/create-books/create-books-command';
+import { CreateBooksXResponse } from './admin/create-books-x/create-books-x-response';
+import { CreateBooksXRequest } from './admin/create-books-x/create-books-x-request';
+import { CreateBooksXCommand } from './admin/create-books-x/create-books-x-command';
 import fs from 'fs';
-import { UpdateBooksResponse } from './commands/update-books/update-books-response';
-import { UpdateBooksRequest } from './commands/update-books/update-books-request';
-import { UpdateBooksCommand } from './commands/update-books/update-books-command';
-import { DeleteBooksRequest } from './commands/delete-books/delete-books-request';
-import { GetAllBooksResponse } from './queries/getAll-books/getAll-books-response';
-import { GetAllBooksRequest } from './queries/getAll-books/getAll-books-request';
-import { GetOneBooksResponse } from './queries/getOne-books/getOne-books-response';
-import { GetOneBooksRequest } from './queries/getOne-books/getOne-books-request';
+import { UpdateBooksXResponse } from './admin/update-books-x/update-books-x-response';
+import { UpdateBooksXRequest } from './admin/update-books-x/update-books-x-request';
+import { UpdateBooksXCommand } from './admin/update-books-x/update-books-x-command';
+import { DeleteBooksXRequest } from './admin/delete-books-x/delete-books-x-request';
+import { GetAllBooksXResponse } from './admin/getAll-books-x/getAll-books-x-response';
+import { GetAllBooksXRequest } from './admin/getAll-books-x/getAll-books-x-request';
+import { GetOneBooksXResponse } from './admin/getOne-books-x/getOne-books-x-response';
+import { GetOneBooksXRequest } from './admin/getOne-books-x/getOne-books-x-request';
+import { GetAllBooksResponse } from './public/getAll-books/getAll-books-response';
+import { GetAllBooksRequest } from './public/getAll-books/getAll-books-request';
+import { GetOneBooksResponse } from './public/getOne-books/getOne-books-response';
+import { GetOneBooksRequest } from './public/getOne-books/getOne-books-request';
 
-@Controller('books/')
-export class BooksController {
+@Controller('books/admin')
+export class BooksXController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
@@ -39,14 +43,14 @@ export class BooksController {
     [{ name: 'image', maxCount: 1 }, { name: 'file', maxCount: 1 }],
     { storage: storageOptions, limits: { fileSize: 1024 * 1024 * 50 } },
   ))
-  @ApiCreatedResponse({ type: CreateBooksResponse })
+  @ApiCreatedResponse({ type: CreateBooksXResponse })
   async create(
-    @Body() payload: CreateBooksRequest,
+    @Body() payload: CreateBooksXRequest,
     @UploadedFiles() files: { image?: Express.Multer.File[]; file?: Express.Multer.File[] },
   ) {
     const image = files.image?.[0];
     const file  = files.file?.[0];
-    const cmd = new CreateBooksCommand(
+    const cmd = new CreateBooksXCommand(
       payload.authorId,
       payload.categoryId,
       payload.title,
@@ -72,15 +76,15 @@ export class BooksController {
     [{ name: 'image', maxCount: 1 }, { name: 'file', maxCount: 1 }],
     { storage: storageOptions, limits: { fileSize: 1024 * 1024 * 50 } },
   ))
-  @ApiOkResponse({ type: UpdateBooksResponse })
+  @ApiOkResponse({ type: UpdateBooksXResponse })
   async update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() payload: UpdateBooksRequest,
+    @Body() payload: UpdateBooksXRequest,
     @UploadedFiles() files?: { image?: Express.Multer.File[]; file?: Express.Multer.File[] },
   ) {
     const image = files?.image?.[0];
     const file  = files?.file?.[0];
-    const cmd = new UpdateBooksCommand(
+    const cmd = new UpdateBooksXCommand(
       id,
       payload.authorId,
       payload.categoryId,
@@ -102,10 +106,33 @@ export class BooksController {
 
   @Delete('delete/:id')
   async delete(@Param('id', ParseIntPipe) id: number) {
-    const cmd = new DeleteBooksRequest();
+    const cmd = new DeleteBooksXRequest();
     cmd.id = id;
     return await this.commandBus.execute(cmd);
   }
+
+  @Get()
+  @ApiOkResponse({ type: [GetAllBooksXResponse] })
+  async getAll() {
+    return await this.queryBus.execute(new GetAllBooksXRequest());
+  }
+
+  @Get(':id')
+  @ApiOkResponse({ type: GetOneBooksXResponse })
+  async getOne(@Param('id', ParseIntPipe) id: number) {
+    const query = new GetOneBooksXRequest();
+    query.id = id;
+    return await this.queryBus.execute(query);
+  }
+}
+
+
+@Controller('books/')
+export class BooksController {
+  constructor(
+    private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus,
+  ) {}
 
   @Get()
   @ApiOkResponse({ type: [GetAllBooksResponse] })

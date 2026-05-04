@@ -1,8 +1,8 @@
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import {
   Body,
   Controller,
-  Delete,
-  Get,
+  Delete, Get,
   Param,
   ParseIntPipe,
   Patch,
@@ -10,22 +10,26 @@ import {
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
-import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiConsumes, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
-import fs from 'fs';
 import { storageOptions } from '../../../config/multer.config';
-import { CreateApplicationsCommand } from './commands/create-applications/create-applications-command';
-import { CreateApplicationsRequest } from './commands/create-applications/create-applications-request';
-import { CreateApplicationsResponse } from './commands/create-applications/create-applications-response';
-import { UpdateApplicationsCommand } from './commands/update-applications/update-applications-command';
-import { UpdateApplicationsRequest } from './commands/update-applications/update-applications-request';
-import { UpdateApplicationsResponse } from './commands/update-applications/update-applications-response';
-import { DeleteApplicationsRequest } from './commands/delete-applications/delete-applications-request';
-import { GetAllApplicationsResponse } from './queries/getAll-applications/getAll-applications-response';
-import { GetAllApplicationsRequest } from './queries/getAll-applications/getAll-applications-request';
-import { GetOneApplicationsResponse } from './queries/getOne-applications/getOne-applications-response';
-import { GetOneApplicationsRequest } from './queries/getOne-applications/getOne-applications-request';
+import { CreateApplicationsResponse } from './public/create-applications/create-applications-response';
+import { CreateApplicationsRequest } from './public/create-applications/create-applications-request';
+import { CreateApplicationsCommand } from './public/create-applications/create-applications-command';
+import fs from 'fs';
+import { UpdateApplicationsResponse } from './public/update-applications/update-applications-response';
+import { UpdateApplicationsRequest } from './public/update-applications/update-applications-request';
+import { UpdateApplicationsCommand } from './public/update-applications/update-applications-command';
+import { DeleteApplicationsRequest } from './public/delete-applications/delete-applications-request';
+import { GetAllApplicationsResponse } from './public/getAll-applications/getAll-applications-response';
+import { GetAllApplicationsRequest } from './public/getAll-applications/getAll-applications-request';
+import { GetOneApplicationsResponse } from './public/getOne-applications/getOne-applications-response';
+import { GetOneApplicationsRequest } from './public/getOne-applications/getOne-applications-request';
+import { GetAllApplicationsXResponse } from './admin/getAll-applications-x/getAll-applications-x-response';
+import { GetAllApplicationsXRequest } from './admin/getAll-applications-x/getAll-applications-x-request';
+import { GetOneApplicationsXResponse } from './admin/getOne-applications-x/getOne-applications-x-response';
+import { GetOneApplicationsXRequest } from './admin/getOne-applications-x/getOne-applications-x-request';
+
 
 @Controller('applications/')
 export class ApplicationsController {
@@ -100,6 +104,27 @@ export class ApplicationsController {
   @ApiOkResponse({ type: GetOneApplicationsResponse })
   async getOne(@Param('id', ParseIntPipe) id: number) {
     const query = new GetOneApplicationsRequest();
+    query.id = id;
+    return await this.queryBus.execute(query);
+  }
+}
+@Controller('applications/admin/')
+export class ApplicationsXController {
+  constructor(
+    private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus,
+  ) {}
+
+  @Get()
+  @ApiOkResponse({ type: [GetAllApplicationsXResponse] })
+  async getAll() {
+    return await this.queryBus.execute(new GetAllApplicationsXRequest());
+  }
+
+  @Get(':id')
+  @ApiOkResponse({ type: GetOneApplicationsXResponse })
+  async getOne(@Param('id', ParseIntPipe) id: number) {
+    const query = new GetOneApplicationsXRequest();
     query.id = id;
     return await this.queryBus.execute(query);
   }

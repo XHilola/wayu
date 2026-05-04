@@ -1,35 +1,37 @@
 import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
-import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
+import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
+import { CreateEventCategoriesXResponse } from './admin/create-event-categories-x/create-event-categories-x-response';
+import { CreateEventCategoriesXRequest } from './admin/create-event-categories-x/create-event-categories-x-request';
+import { UpdateEventCategoriesXResponse } from './admin/update-event-categories-x/update-event-categories-x-response';
+import { UpdateEventCategoriesXRequest } from './admin/update-event-categories-x/update-event-categories-x-request';
+import { DeleteEventCategoriesXRequest } from './admin/delete-event-categories-x/delete-event-categories-x-request';
+import { GetAllEventCategoriesXResponse } from './admin/get-all-event-categories-x/get-all-event-categories-x-response';
+import { GetAllEventCategoriesXRequest } from './admin/get-all-event-categories-x/get-all-event-categories-x-request';
+import { GetOneEventCategoriesXResponse } from './admin/get-one-event-categories-x/get-one-event-categories-x-response';
+import { GetOneEventCategoriesXRequest } from './admin/get-one-event-categories-x/get-one-event-categories-x-request';
+import { GetAllEventCategoriesResponse } from './public/get-all-event-categories/get-all-event-categories-response';
+import { GetAllEventCategoriesRequest } from './public/get-all-event-categories/get-all-event-categories-request';
+import { GetOneEventCategoriesRequest } from './public/get-one-event-categories/get-one-event-categories-request';
+import { GetOneEventCategoriesResponse } from './public/get-one-event-categories/get-one-event-categories-response';
 
-import { CreateEventCategoriesRequest } from './commands/create-event-categories/create-event-categories-request';
-import { CreateEventCategoriesResponse } from './commands/create-event-categories/create-event-categories-response';
-import { UpdateEventCategoriesRequest } from './commands/update-event-categories/update-event-categories-request';
-import { UpdateEventCategoriesResponse } from './commands/update-event-categories/update-event-categories-response';
-import { DeleteEventCategoriesRequest } from './commands/delete-event-categories/delete-event-categories-request';
-import { GetAllEventCategoriesRequest } from './queries/get-all-event-categories/get-all-event-categories-request';
-import { GetAllEventCategoriesResponse } from './queries/get-all-event-categories/get-all-event-categories-response';
-import { GetOneEventCategoriesRequest } from './queries/get-one-event-categories/get-one-event-categories-request';
-import { GetOneEventCategoriesResponse } from './queries/get-one-event-categories/get-one-event-categories-response';
-import { EventCategories } from './eventCategories.entity';
-
-@Controller('event-categories/')
-export class EventCategoriesController {
+@Controller('event-categories/admin')
+export class EventCategoriesXController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
   ) {}
 
   @Post('create')
-  @ApiCreatedResponse({ type: CreateEventCategoriesResponse })
-  async create(@Body() payload: CreateEventCategoriesRequest) {
+  @ApiCreatedResponse({ type: CreateEventCategoriesXResponse })
+  async create(@Body() payload: CreateEventCategoriesXRequest) {
     return await this.commandBus.execute(payload);
   }
 
   @Patch('patch/:id')
-  @ApiOkResponse({ type: UpdateEventCategoriesResponse })
-  async update(@Param('id', ParseIntPipe) id: number, @Body() payload: UpdateEventCategoriesRequest) {
-    const cmd = new UpdateEventCategoriesRequest();
+  @ApiOkResponse({ type: UpdateEventCategoriesXResponse })
+  async update(@Param('id', ParseIntPipe) id: number, @Body() payload: UpdateEventCategoriesXRequest) {
+    const cmd = new UpdateEventCategoriesXRequest();
     cmd.id = id;
     cmd.title = payload.title;
     return await this.commandBus.execute(cmd);
@@ -37,10 +39,32 @@ export class EventCategoriesController {
 
   @Delete('delete/:id')
   async delete(@Param('id', ParseIntPipe) id: number) {
-    const cmd = new DeleteEventCategoriesRequest();
+    const cmd = new DeleteEventCategoriesXRequest();
     cmd.id = id;
     return await this.commandBus.execute(cmd);
   }
+
+  @Get()
+  @ApiOkResponse({ type: [GetAllEventCategoriesXResponse] })
+  async getAll() {
+    return await this.queryBus.execute(new GetAllEventCategoriesXRequest());
+  }
+
+  @Get(':id')
+  @ApiOkResponse({ type: GetOneEventCategoriesXResponse })
+  async getOne(@Param('id', ParseIntPipe) id: number) {
+    const query = new GetOneEventCategoriesXRequest();
+    query.id = id;
+    return await this.queryBus.execute(query);
+  }
+}
+
+@Controller('event-categories/')
+export class EventCategoriesController {
+  constructor(
+    private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus,
+  ) {}
 
   @Get()
   @ApiOkResponse({ type: [GetAllEventCategoriesResponse] })

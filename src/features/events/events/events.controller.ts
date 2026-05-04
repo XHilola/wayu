@@ -1,8 +1,7 @@
 import {
   Body,
   Controller,
-  Delete,
-  Get,
+  Delete, Get,
   Param,
   ParseIntPipe,
   Patch,
@@ -13,36 +12,41 @@ import {
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiConsumes, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
-import fs from 'fs';
 import { storageOptions } from '../../../config/multer.config';
-import { CreateEventsCommand } from './commands/create-events/create-events-command';
-import { CreateEventsRequest } from './commands/create-events/create-events-request';
-import { CreateEventsResponse } from './commands/create-events/create-events-response';
-import { UpdateEventsCommand } from './commands/update-events/update-events-command';
-import { UpdateEventsRequest } from './commands/update-events/update-events-request';
-import { UpdateEventsResponse } from './commands/update-events/update-events-response';
-import { DeleteEventsRequest } from './commands/delete-events/delete-events-request';
-import { GetAllEventsRequest } from './queries/get-all-events/get-all-events-request';
-import { GetAllEventsResponse } from './queries/get-all-events/get-all-events-response';
-import { GetOneEventsRequest } from './queries/get-one-events/get-one-events-request';
-import { GetOneEventsResponse } from './queries/get-one-events/get-one-events-response';
+import { CreateEventsXResponse } from './admin/create-events-x/create-events-x-response';
+import { CreateEventsXRequest } from './admin/create-events-x/create-events-x-request';
+import { CreateEventsXCommand } from './admin/create-events-x/create-events-x-command';
+import fs from 'fs';
+import { UpdateEventsXResponse } from './admin/update-events-x/update-events-x-response';
+import { UpdateEventsXRequest } from './admin/update-events-x/update-events-x-request';
+import { UpdateEventsXCommand } from './admin/update-events-x/update-events-x-command';
+import { DeleteEventsXRequest } from './admin/delete-events-x/delete-events-x-request';
+import { GetAllEventsXResponse } from './admin/get-all-events-x/get-all-events-x-response';
+import { GetAllEventsXRequest } from './admin/get-all-events-x/get-all-events-x-request';
+import { GetOneEventsResponse } from './public/get-one-events/get-one-events-response';
+import { GetOneEventsXRequest } from './admin/get-one-events-x/get-one-events-x-request';
+import { GetAllEventsResponse } from './public/get-all-events/get-all-events-response';
+import { GetAllEventsRequest } from './public/get-all-events/get-all-events-request';
+import { GetOneEventsRequest } from './public/get-one-events/get-one-events-request';
 
-@Controller('events/')
-export class EventsController {
+
+@Controller('events/admin')
+export class EventsXController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
-  ) {}
+  ) {
+  }
 
   @Post('create')
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('image', { storage: storageOptions, limits: { fileSize: 1024 * 1024 * 6 } }))
-  @ApiCreatedResponse({ type: CreateEventsResponse })
+  @ApiCreatedResponse({ type: CreateEventsXResponse })
   async create(
-    @Body() payload: CreateEventsRequest,
+    @Body() payload: CreateEventsXRequest,
     @UploadedFile() image: Express.Multer.File,
   ) {
-    const cmd = new CreateEventsCommand(
+    const cmd = new CreateEventsXCommand(
       payload.categoryId,
       payload.title,
       payload.content,
@@ -62,13 +66,13 @@ export class EventsController {
   @Patch('patch/:id')
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('image', { storage: storageOptions, limits: { fileSize: 1024 * 1024 * 6 } }))
-  @ApiOkResponse({ type: UpdateEventsResponse })
+  @ApiOkResponse({ type: UpdateEventsXResponse })
   async update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() payload: UpdateEventsRequest,
+    @Body() payload: UpdateEventsXRequest,
     @UploadedFile() image?: Express.Multer.File,
   ) {
-    const cmd = new UpdateEventsCommand(
+    const cmd = new UpdateEventsXCommand(
       id,
       payload.categoryId,
       payload.title,
@@ -88,10 +92,34 @@ export class EventsController {
 
   @Delete('delete/:id')
   async delete(@Param('id', ParseIntPipe) id: number) {
-    const cmd = new DeleteEventsRequest();
+    const cmd = new DeleteEventsXRequest();
     cmd.id = id;
     return await this.commandBus.execute(cmd);
   }
+
+  @Get()
+  @ApiOkResponse({ type: [GetAllEventsXResponse] })
+  async getAll() {
+    return await this.queryBus.execute(new GetAllEventsXRequest());
+  }
+
+  @Get(':id')
+  @ApiOkResponse({ type: GetOneEventsResponse })
+  async getOne(@Param('id', ParseIntPipe) id: number) {
+    const query = new GetOneEventsXRequest();
+    query.id = id;
+    return await this.queryBus.execute(query);
+  }
+}
+
+@Controller('events/')
+export class EventsController {
+  constructor(
+    private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus,
+  ) {
+  }
+
 
   @Get()
   @ApiOkResponse({ type: [GetAllEventsResponse] })

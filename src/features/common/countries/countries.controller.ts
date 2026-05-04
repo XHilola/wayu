@@ -13,22 +13,27 @@ import {
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiConsumes, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
-import fs from 'fs';
 import { storageOptions } from '../../../config/multer.config';
-import { CreateCountriesCommand } from './commands/create-countries/create-countries-command';
-import { CreateCountriesRequest } from './commands/create-countries/create-countries-request';
-import { CreateCountriesResponse } from './commands/create-countries/create-countries-response';
-import { UpdateCountriesCommand } from './commands/update-countries/update-countries-command';
-import { UpdateCountriesRequest } from './commands/update-countries/update-countries-request';
-import { UpdateCountriesResponse } from './commands/update-countries/update-countries-response';
-import { DeleteCountriesCommand } from './commands/delete-countries/delete-countries-command';
-import { GetAllCountriesRequest } from './queries/get-all-countries/get-all-countries-request';
-import { GetAllCountriesResponse } from './queries/get-all-countries/get-all-countries-response';
-import { GetOneCountriesRequest } from './queries/get-one-countries/get-one-countries-request';
-import { GetOneCountriesResponse } from './queries/get-one-countries/get-one-countries-response';
+import { CreateCountriesXResponse } from './admin/create-countries-x/create-countries-x-response';
+import { CreateCountriesXRequest } from './admin/create-countries-x/create-countries-x-request';
+import { CreateCountriesXCommand } from './admin/create-countries-x/create-countries-x-command';
+import fs from 'fs';
+import { UpdateCountriesXResponse } from './admin/update-countries-x/update-countries-x-response';
+import { UpdateCountriesXRequest } from './admin/update-countries-x/update-countries-x-request';
+import { UpdateCountriesXCommand } from './admin/update-countries-x/update-countries-x-command';
+import { DeleteCountriesXCommand } from './admin/delete-countries-x/delete-countries-x-command';
+import { GetAllCountriesXResponse } from './admin/get-all-countries-x/get-all-countries-x-response';
+import { GetAllCountriesXRequest } from './admin/get-all-countries-x/get-all-countries-x-request';
+import { GetOneCountriesXResponse } from './admin/get-one-countries-x/get-one-countries-x-response';
+import { GetOneCountriesXRequest } from './admin/get-one-countries-x/get-one-countries-x-request';
+import { GetAllCountriesResponse } from './public/get-all-countries/get-all-countries-response';
+import { GetAllCountriesRequest } from './public/get-all-countries/get-all-countries-request';
+import { GetOneCountriesResponse } from './public/get-one-countries/get-one-countries-response';
+import { GetOneCountriesRequest } from './public/get-one-countries/get-one-countries-request';
 
-@Controller('countries/')
-export class CountriesController {
+
+@Controller('countries/admin')
+export class CountriesControllerX {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
@@ -37,12 +42,12 @@ export class CountriesController {
   @Post('create')
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('flag', { storage: storageOptions, limits: { fileSize: 1024 * 1024 * 6 } }))
-  @ApiCreatedResponse({ type: CreateCountriesResponse })
+  @ApiCreatedResponse({ type: CreateCountriesXResponse })
   async create(
-    @Body() payload: CreateCountriesRequest,
+    @Body() payload: CreateCountriesXRequest,
     @UploadedFile() flag: Express.Multer.File,
   ) {
-    const cmd = new CreateCountriesCommand(payload.title, flag);
+    const cmd = new CreateCountriesXCommand(payload.title, flag);
     try {
       return await this.commandBus.execute(cmd);
     } catch (exc) {
@@ -54,13 +59,13 @@ export class CountriesController {
   @Patch('patch/:id')
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('flag', { storage: storageOptions, limits: { fileSize: 1024 * 1024 * 6 } }))
-  @ApiOkResponse({ type: UpdateCountriesResponse })
+  @ApiOkResponse({ type: UpdateCountriesXResponse })
   async update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() payload: UpdateCountriesRequest,
+    @Body() payload: UpdateCountriesXRequest,
     @UploadedFile() flag?: Express.Multer.File,
   ) {
-    const cmd = new UpdateCountriesCommand(id, payload.title, flag);
+    const cmd = new UpdateCountriesXCommand(id, payload.title, flag);
     try {
       return await this.commandBus.execute(cmd);
     } catch (exc) {
@@ -71,10 +76,33 @@ export class CountriesController {
 
   @Delete('delete/:id')
   async delete(@Param('id', ParseIntPipe) id: number) {
-    const cmd = new DeleteCountriesCommand();
+    const cmd = new DeleteCountriesXCommand();
     cmd.id = id;
     return await this.commandBus.execute(cmd);
   }
+
+  @Get()
+  @ApiOkResponse({ type: [GetAllCountriesXResponse] })
+  async getAll() {
+    return await this.queryBus.execute(new GetAllCountriesXRequest());
+  }
+
+  @Get(':id')
+  @ApiOkResponse({ type: GetOneCountriesXResponse })
+  async getOne(@Param('id', ParseIntPipe) id: number) {
+    const query = new GetOneCountriesXRequest();
+    query.id = id;
+    return await this.queryBus.execute(query);
+  }
+}
+
+@Controller('countries/')
+export class CountriesController {
+  constructor(
+    private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus,
+  ) {}
+
 
   @Get()
   @ApiOkResponse({ type: [GetAllCountriesResponse] })
