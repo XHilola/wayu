@@ -1,8 +1,9 @@
 import { Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne } from 'typeorm';
-import type { NewsCategories } from '../news-categories/newsCategories.entity';
-import type { Countries } from '../../common/countries/countries.entity';
-import type { Tags } from '../tags/tags.entity';
+import  { NewsCategories } from '../news-categories/newsCategories.entity';
+import  { Countries } from '../../common/countries/countries.entity';
+import  { Tags } from '../tags/tags.entity';
 import { BaseModel } from '../../../core/basemodel';
+import type {Relation} from 'typeorm'
 
 @Entity('news')
 export class News extends BaseModel {
@@ -26,23 +27,14 @@ export class News extends BaseModel {
   content!: string;
 
   @JoinColumn({ name: 'categoryId' })
-  @ManyToOne(
-    () => require('../news-categories/newsCategories.entity').NewsCategories,
-    (a: NewsCategories) => a.news,
-  )
-  category?: NewsCategories;
+  @ManyToOne(()=>NewsCategories,category=>category.news)
+  category?: Relation<NewsCategories>;
 
   @JoinColumn({ name: 'countryId' })
-  @ManyToOne(
-    () => require('../../common/countries/countries.entity').Countries,
-    { nullable: true },
-  )
-  country?: Countries;
+  @ManyToOne(()=>Countries,country=>country.news)
+  country?: Relation<Countries>;
 
   @JoinTable({ name: 'newsTags', joinColumn: { name: 'newsId' }, inverseJoinColumn: { name: 'tagId' } })
-  @ManyToMany(
-    () => require('../tags/tags.entity').Tags,
-    (a: Tags) => a.news,
-  )
-  tags?: Tags[];
+  @ManyToMany(()=>Tags,tags=>tags.news)
+  tags?:Relation<Tags[]>;
 }

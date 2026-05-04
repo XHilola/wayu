@@ -1,6 +1,7 @@
 import { Column, Entity, OneToMany } from 'typeorm';
 import { BaseModel } from '../../../core/basemodel';
-import type { Books } from '../books/books.entity';
+import { Books } from '../books/books.entity';
+import type {Relation} from 'typeorm'
 
 @Entity('authors')
 export class Authors extends BaseModel {
@@ -8,9 +9,6 @@ export class Authors extends BaseModel {
   @Column({ length: 64 })
   fullName!: string;
 
-  @OneToMany(
-    () => require('../books/books.entity').Books,
-    (a: Books) => a.author,
-  )
-  books?: Books[];
+  @OneToMany(()=>Books, books=>books.author)
+  books?: Relation<Books[]>;
 }

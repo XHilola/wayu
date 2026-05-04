@@ -1,6 +1,8 @@
 import { Column, Entity, OneToMany } from 'typeorm';
-import type { Branches } from '../../organization/branches/branches.entity';
+import { Branches } from '../../organization/branches/branches.entity';
 import { BaseModel } from '../../../core/basemodel';
+import type {Relation} from 'typeorm';
+import { News } from '../../news/news/news.entity';
 
 @Entity('countries')
 export class Countries extends BaseModel {
@@ -11,9 +13,9 @@ export class Countries extends BaseModel {
   @Column({ length: 128 })
   flag!: string;
 
-  @OneToMany(
-    () => require('../../organization/branches/branches.entity').Branches,
-    (a: Branches) => a.country,
-  )
-  branches?: Branches[];
+  @OneToMany(()=>Branches,branches=>branches.country)
+  branches?: Relation<Branches[]>;
+
+  @OneToMany(()=>News,news=>news.country)
+  news?:Relation<News>
 }

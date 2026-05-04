@@ -1,6 +1,7 @@
 import { Column, Entity, OneToMany } from 'typeorm';
 import { BaseModel } from '../../../core/basemodel';
-import type { Branches } from '../branches/branches.entity'; // type-only
+import  { Branches } from '../branches/branches.entity';
+import type {Relation} from 'typeorm';
 
 @Entity('representatives')
 export class Representatives extends BaseModel {
@@ -20,9 +21,6 @@ export class Representatives extends BaseModel {
   @Column({ type: 'text' })
   resume!: string;
 
-  @OneToMany(
-    () => require('../branches/branches.entity').Branches,
-    (a: Branches) => a.representative,
-  )
-  branches?: Branches[];
+  @OneToMany(()=>Branches,branches=>branches.representative)
+  branches?: Relation<Branches[]>;
 }

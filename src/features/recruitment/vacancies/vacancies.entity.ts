@@ -1,7 +1,8 @@
 import { Column, Entity, OneToMany } from 'typeorm';
-import type { Applications } from '../applications/applications.entity';
+import  { Applications } from '../applications/applications.entity';
 import { BaseModel } from '../../../core/basemodel';
 import { vacancyType } from '../../../core/enums/vacancyType.enum';
+import type {Relation} from 'typeorm';
 
 @Entity('vacancies')
 export class Vacancies extends BaseModel {
@@ -27,9 +28,6 @@ export class Vacancies extends BaseModel {
   @Column({ default: true })
   isActive!: boolean;
 
-  @OneToMany(
-    () => require('../applications/applications.entity').Applications,
-    (a: Applications) => a.vacancy,
-  )
-  applications?: Applications[];
+  @OneToMany(()=>Applications,applications=>applications.vacancy)
+  applications?: Relation<Applications[]>;
 }

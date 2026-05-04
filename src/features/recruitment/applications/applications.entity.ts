@@ -1,7 +1,8 @@
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { BaseModel } from '../../../core/basemodel';
 import { applicationStatus } from '../../../core/enums/applicationStatus.enum';
-import type { Vacancies } from '../vacancies/vacancies.entity';
+import  { Vacancies } from '../vacancies/vacancies.entity';
+import type {Relation} from 'typeorm';
 
 @Entity('applications')
 export class Applications extends BaseModel {
@@ -25,9 +26,6 @@ export class Applications extends BaseModel {
   status!: applicationStatus;
 
   @JoinColumn({ name: 'vacancyId' })
-  @ManyToOne(
-    () => require('../vacancies/vacancies.entity').Vacancies,
-    (a: Vacancies) => a.applications,
-  )
-  vacancy?: Vacancies;
+  @ManyToOne(()=>Vacancies,vacancy=>vacancy.applications)
+  vacancy?: Relation<Vacancies>;
 }

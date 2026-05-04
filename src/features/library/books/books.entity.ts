@@ -1,7 +1,8 @@
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { BaseModel } from '../../../core/basemodel';
-import type { Authors } from '../authors/authors.entity';
-import type { BookCategories } from '../book-categories/bookCategories.entity';
+import  { Authors } from '../authors/authors.entity';
+import  { BookCategories } from '../book-categories/bookCategories.entity';
+import type {Relation} from 'typeorm';
 
 @Entity('books')
 export class Books extends BaseModel {
@@ -31,16 +32,10 @@ export class Books extends BaseModel {
   year!: number;
 
   @JoinColumn({ name: 'authorId' })
-  @ManyToOne(
-    () => require('../authors/authors.entity').Authors,
-    (a: Authors) => a.books,
-  )
-  author?: Authors;
+  @ManyToOne(()=>Authors,author=>author.books)
+  author?: Relation<Authors>
 
   @JoinColumn({ name: 'categoryId' })
-  @ManyToOne(
-    () => require('../book-categories/bookCategories.entity').BookCategories,
-    (a: BookCategories) => a.books,
-  )
-  category?: BookCategories;
+  @ManyToOne(()=>BookCategories,category=>category.books)
+  category?: Relation<BookCategories>;
 }

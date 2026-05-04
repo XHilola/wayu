@@ -1,7 +1,8 @@
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
-import type { Countries } from '../../common/countries/countries.entity';
+import  { Countries } from '../../common/countries/countries.entity';
 import { BaseModel } from '../../../core/basemodel';
-import type { Representatives } from '../representatives/representatives.entity';
+import  { Representatives } from '../representatives/representatives.entity';
+import type {Relation} from 'typeorm';
 
 @Entity('branches')
 export class Branches extends BaseModel {
@@ -25,16 +26,10 @@ export class Branches extends BaseModel {
   phoneNumber!: string;
 
   @JoinColumn({ name: 'countryId' })
-  @ManyToOne(
-    () => require('../../common/countries/countries.entity').Countries,
-    (a: Countries) => a.branches,
-  )
-  country?: Countries;
+  @ManyToOne(()=>Countries,country=>country.branches)
+  country?: Relation<Countries>;
 
   @JoinColumn({ name: 'representativeId' })
-  @ManyToOne(
-    () => require('../representatives/representatives.entity').Representatives,
-    (a: Representatives) => a.branches,
-  )
-  representative?: Representatives;
+  @ManyToOne(()=>Representatives,representatives=>representatives.branches)
+  representative?: Relation<Representatives>;
 }
