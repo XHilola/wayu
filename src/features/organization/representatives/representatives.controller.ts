@@ -92,13 +92,13 @@ export class RepresentativesXController {
     return await this.commandBus.execute(cmd);
   }
 
-  @Get()
+  @Get('get')
   @ApiOkResponse({ type: [GetAllRepresentativesXResponse] })
   async getAll() {
     return await this.queryBus.execute(new GetAllRepresentativesXRequest());
   }
 
-  @Get(':id')
+  @Get('/:id')
   @ApiOkResponse({ type: GetOneRepresentativesXResponse })
   async getOne(@Param('id', ParseIntPipe) id: number) {
     const query = new GetOneRepresentativesXRequest();
@@ -121,7 +121,7 @@ export class RepresentativesController {
     return await this.queryBus.execute(new GetAllRepresentativesRequest());
   }
 
-  @Get(':id')
+  @Get('/:id')
   @ApiOkResponse({ type: GetOneRepresentativesResponse })
   async getOne(@Param('id', ParseIntPipe) id: number) {
     const query = new GetOneRepresentativesRequest();

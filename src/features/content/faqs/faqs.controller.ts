@@ -56,7 +56,7 @@ export class FaqsController {
     return await this.queryBus.execute(new GetAllFaqsRequest());
   }
 
-  @Get(':id')
+  @Get('/:id')
   @ApiOkResponse({ type: GetOneFaqsResponse })
   async getOne(@Param('id', ParseIntPipe) id: number) {
     const query = new GetOneFaqsRequest();
@@ -65,7 +65,7 @@ export class FaqsController {
   }
 }
 
-@Controller('faqs/admin')
+@Controller('faqs/admin/')
 export class FaqsXController {
   constructor(
     private readonly commandBus: CommandBus,
@@ -79,7 +79,7 @@ export class FaqsXController {
     return await this.queryBus.execute(new GetAllFaqsXRequest());
   }
 
-  @Get(':id')
+  @Get('/:id')
   @ApiOkResponse({ type: GetOneFaqsXResponse })
   async getOne(@Param('id', ParseIntPipe) id: number) {
     const query = new GetOneFaqsXRequest();

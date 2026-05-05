@@ -22,13 +22,13 @@ export class BranchesXController {
     private readonly queryBus: QueryBus,
   ) {}
 
-  @Get()
+  @Get('get')
   @ApiOkResponse({ type: GetAllBranchesXResponse })
   async getAll() {
     return await this.queryBus.execute(new GetAllBranchesXRequest());
   }
 
-  @Get('/:id')
+  @Get('get/:id')
   @ApiOkResponse({ type: GetOneBranchesXResponse })
   async getOne(@Param('id') id: number) {
     const query = new GetOneBranchesXRequest();
@@ -42,7 +42,7 @@ export class BranchesXController {
     return await this.commandBus.execute(payload);
   }
 
-  @Patch('/:id')
+  @Patch('patch/:id')
   @ApiOkResponse({ type: UpdateBranchesXResponse })
   async update(@Param('id') id: number, @Body() payload: UpdateBranchesXRequest) {
     const cmd = new UpdateBranchesXRequest();
@@ -56,7 +56,7 @@ export class BranchesXController {
     return await this.commandBus.execute(cmd);
   }
 
-  @Delete('/:id')
+  @Delete('delete/:id')
   @ApiOkResponse()
   async delete(@Param('id') id: number) {
     const cmd = new DeleteBranchesXRequest();
@@ -73,13 +73,13 @@ export class BranchesController {
     private readonly queryBus: QueryBus,
   ) {}
 
-  @Get()
+  @Get('get')
   @ApiOkResponse({ type: GetAllBranchesResponse })
   async getAll() {
     return await this.queryBus.execute(new GetAllBranchesRequest());
   }
 
-  @Get('/:id')
+  @Get('get/:id')
   @ApiOkResponse({ type: GetOneBranchesResponse })
   async getOne(@Param('id') id: number) {
     const query = new GetOneBranchesRequest();

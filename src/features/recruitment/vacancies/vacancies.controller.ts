@@ -15,7 +15,7 @@ import { GetAllVacanciesRequest } from './public/getAll-vacancies/getAll-vacanci
 import { GetOneVacanciesResponse } from './public/getOne-vacancies/getOne-vacancies-response';
 import { GetOneVacanciesRequest } from './public/getOne-vacancies/getOne-vacancies-request';
 
-@Controller('vacancies/admin')
+@Controller('vacancies/admin/')
 export class VacanciesXController {
   constructor(
     private readonly commandBus: CommandBus,
@@ -59,7 +59,7 @@ export class VacanciesXController {
     return await this.queryBus.execute(new GetAllVacanciesXRequest());
   }
 
-  @Get(':id')
+  @Get('get/:id')
   @ApiOkResponse({ type: GetOneVacanciesXResponse })
   async getOne(@Param('id', ParseIntPipe) id: number) {
     const query = new GetOneVacanciesXRequest();
@@ -83,7 +83,7 @@ export class VacanciesController {
     return await this.queryBus.execute(new GetAllVacanciesRequest());
   }
 
-  @Get(':id')
+  @Get('get/:id')
   @ApiOkResponse({ type: GetOneVacanciesResponse })
   async getOne(@Param('id', ParseIntPipe) id: number) {
     const query = new GetOneVacanciesRequest();

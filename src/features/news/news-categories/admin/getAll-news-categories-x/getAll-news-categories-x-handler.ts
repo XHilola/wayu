@@ -5,7 +5,7 @@ import { NewsCategories } from '../../newsCategories.entity';
 import { GetAllNewsCategoriesXRequest } from './getAll-news-categories-x-request';
 import { GetAllNewsCategoriesXResponse } from './getAll-news-categories-x-response';
 
-@Injectable()
+// @Injectable()
 @QueryHandler(GetAllNewsCategoriesXRequest)
 export class GetAllNewsCategoriesXHandler implements IQueryHandler<GetAllNewsCategoriesXRequest> {
   async execute(query: GetAllNewsCategoriesXRequest): Promise<GetAllNewsCategoriesXResponse[]> {

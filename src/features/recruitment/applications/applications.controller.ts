@@ -100,7 +100,7 @@ export class ApplicationsController {
     return await this.queryBus.execute(new GetAllApplicationsRequest());
   }
 
-  @Get(':id')
+  @Get('get/:id')
   @ApiOkResponse({ type: GetOneApplicationsResponse })
   async getOne(@Param('id', ParseIntPipe) id: number) {
     const query = new GetOneApplicationsRequest();
@@ -121,7 +121,7 @@ export class ApplicationsXController {
     return await this.queryBus.execute(new GetAllApplicationsXRequest());
   }
 
-  @Get(':id')
+  @Get('get/:id')
   @ApiOkResponse({ type: GetOneApplicationsXResponse })
   async getOne(@Param('id', ParseIntPipe) id: number) {
     const query = new GetOneApplicationsXRequest();

@@ -373,14 +373,30 @@ import {
 import {
   GetOneVacanciesHandler
 } from './features/recruitment/vacancies/public/getOne-vacancies/getOne-vacancies-handler';
+import { JwtModule } from '@nestjs/jwt';
+import { AuthController } from './features/authorization/auth.controller';
+import { CreateAdminHandler } from './features/authorization/superAdmin/create-admin/create-admin-handler';
+import { LoginHandler } from './features/authorization/admin/login-handler';
+import { GetAllCountriesHandler } from './features/common/countries/public/get-all-countries/get-all-countries-handler';
+import { GetAllLanguagesHandler } from './features/common/languages/public/get-all-languages/get-all-languages-handler';
+import { GetOneLanguagesHandler } from './features/common/languages/public/get-one-languages/get-one-languages-handler';
+import {
+  GetAllUsefulLinksHandler
+} from './features/content/useful-links/public/get-all-useful-links/get-all-useful-links-handler';
+import { GetOneEventsXHandler } from './features/events/events/admin/get-one-events-x/get-one-events-x-handler';
 
 @Module({
   imports: [
     TypeOrmModule.forRoot(typeOrmConfig),
     CqrsModule.forRoot(),
-    ConfigModule.forRoot({isGlobal:true})
+    ConfigModule.forRoot({isGlobal:true}),
+    JwtModule.register({
+      secret: 'SIZNING_MAXFIY_KALITINGIZ',
+      signOptions: { expiresIn: '1d' },
+    })
   ],
   controllers: [
+    AuthController,
     CountriesController,
     CountriesControllerX,
     LanguagesController,
@@ -427,12 +443,15 @@ import {
     ApplicationsXController
   ],
   providers: [
+    CreateAdminHandler,
+    LoginHandler,
+
     CreateCountriesXHandler,
     DeleteCountriesXHandler,
     GetAllCountriesXHandler,
     GetOneCountriesXHandler,
     UpdateCountriesXHandler,
-    GetAllCountriesXHandler,
+    GetAllCountriesHandler,
     GetOneCountriesHandler,
 
     CreateLanguagesXHandler,
@@ -440,6 +459,8 @@ import {
     GetAllLanguagesXHandler,
     GetOneLanguagesXHandler,
     UpdateLanguagesXHandler,
+    GetAllLanguagesHandler,
+    GetOneLanguagesHandler,
 
     GetAllFaqsXHandler,
     GetOneFaqsXHandler,
@@ -478,7 +499,7 @@ import {
     GetAllUsefulLinksXHandler,
     GetOneUsefulLinksXHandler,
     UpdateUsefulLinksXHandler,
-    GetAllUsefulLinksXHandler,
+    GetAllUsefulLinksHandler,
     GetOneUsefulLinksHandler,
 
     CreateEventCategoriesXHandler,
@@ -492,7 +513,7 @@ import {
     CreateEventsXHandler,
     DeleteEventsXHandler,
     GetAllEventsXHandler,
-    GetOneExpensesXHandler,
+    GetOneEventsXHandler,
     UpdateEventsXHandler,
     GetAllEventsHandler,
     GetOneEventsHandler,
@@ -598,7 +619,8 @@ import {
     GetOneVacanciesXHandler,
     UpdateVacanciesXHandler,
     GetAllVacanciesHandler,
-    GetOneVacanciesHandler
+    GetOneVacanciesHandler,
+
 
 
   ],

@@ -8,6 +8,7 @@ import {
   Patch,
   Post,
   UploadedFile,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
@@ -30,9 +31,16 @@ import { GetAllCountriesResponse } from './public/get-all-countries/get-all-coun
 import { GetAllCountriesRequest } from './public/get-all-countries/get-all-countries-request';
 import { GetOneCountriesResponse } from './public/get-one-countries/get-one-countries-response';
 import { GetOneCountriesRequest } from './public/get-one-countries/get-one-countries-request';
+import { JwtGuard } from '../../../core/guards/jwt.guard';
+import { RolesGuard } from '../../../core/guards/roles.guard';
+import { Roles } from '../../../core/decors/roles.decorator';
+import { RolesEnum } from '../../../core/enums/roles.enum';
 
 
-@Controller('countries/admin')
+
+@Controller('countries/admin/')
+@UseGuards(JwtGuard,RolesGuard)
+@Roles(RolesEnum.admin,RolesEnum.superAdmin)
 export class CountriesControllerX {
   constructor(
     private readonly commandBus: CommandBus,
@@ -87,7 +95,7 @@ export class CountriesControllerX {
     return await this.queryBus.execute(new GetAllCountriesXRequest());
   }
 
-  @Get(':id')
+  @Get('get/:id')
   @ApiOkResponse({ type: GetOneCountriesXResponse })
   async getOne(@Param('id', ParseIntPipe) id: number) {
     const query = new GetOneCountriesXRequest();
@@ -110,7 +118,7 @@ export class CountriesController {
     return await this.queryBus.execute(new GetAllCountriesRequest());
   }
 
-  @Get(':id')
+  @Get('get/:id')
   @ApiOkResponse({ type: GetOneCountriesResponse })
   async getOne(@Param('id', ParseIntPipe) id: number) {
     const query = new GetOneCountriesRequest();

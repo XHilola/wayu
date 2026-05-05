@@ -16,7 +16,7 @@ import { GetOneQuestionsXResponse } from './admin/getOne-expenses-x/getOne-expen
 import { GetOneQuestionsXRequest } from './admin/getOne-expenses-x/getOne-expenses-x-request';
 
 
-@Controller('questions')
+@Controller('questions/')
 export class QuestionsController {
   constructor(
     private readonly commandBus: CommandBus,
@@ -29,7 +29,7 @@ export class QuestionsController {
     return await this.queryBus.execute(new GetAllQuestionsRequest());
   }
 
-  @Get('/:id')
+  @Get('get/:id')
   @ApiOkResponse({ type: GetOneQuestionsResponse })
   async getOne(@Param('id') id: number) {
     const query = new GetOneQuestionsRequest();
@@ -43,7 +43,7 @@ export class QuestionsController {
     return await this.commandBus.execute(payload);
   }
 
-  @Patch('/:id')
+  @Patch('update/:id')
   @ApiOkResponse({ type: UpdateQuestionsResponse })
   async update(@Param('id') id: number, @Body() payload: UpdateQuestionsRequest) {
     const cmd = new UpdateQuestionsRequest();
@@ -63,7 +63,7 @@ export class QuestionsController {
     return await this.commandBus.execute(cmd);
   }
 }
-@Controller('questions/admin')
+@Controller('questions/admin/')
 export class QuestionsXController {
   constructor(
     private readonly commandBus: CommandBus,
@@ -76,7 +76,7 @@ export class QuestionsXController {
     return await this.queryBus.execute(new GetAllQuestionsXRequest());
   }
 
-  @Get('/:id')
+  @Get('get/:id')
   @ApiOkResponse({ type: GetOneQuestionsXResponse })
   async getOne(@Param('id') id: number) {
     const query = new GetOneQuestionsXRequest();

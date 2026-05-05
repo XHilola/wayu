@@ -1,17 +1,23 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { GetAllNewsCategoriesXResponse } from './admin/getAll-news-categories-x/getAll-news-categories-x-response';
 import { GetAllNewsCategoriesXRequest } from './admin/getAll-news-categories-x/getAll-news-categories-x-request';
 import { GetOneNewsCategoriesXResponse } from './admin/getOne-news-categories-x/getOne-news-categories-x-response';
 import { GetOneNewsCategoriesXRequest } from './admin/getOne-news-categories-x/getOne-news-categories-x-request';
-import { CreateNewsCategoriesXResponse } from './admin/create-news-categories-x/create-news-categories-x-response';
 import { CreateNewsCategoriesXRequest } from './admin/create-news-categories-x/create-news-categories-x-request';
 import { UpdateNewsCategoriesXResponse } from './admin/update-news-categories-x/update-news-categories-x-response';
 import { UpdateNewsCategoriesXRequest } from './admin/update-news-categories-x/update-news-categories-x-request';
 import { DeleteNewsCategoriesXRequest } from './admin/delete-news-categories-x/delete-news-categories-x-request';
+import { JwtGuard } from '../../../core/guards/jwt.guard';
+import { RolesGuard } from '../../../core/guards/roles.guard';
+import { CreateNewsCategoriesXResponse } from './admin/create-news-categories-x/create-news-categories-x-response';
+import { Roles } from '../../../core/decors/roles.decorator';
+import { RolesEnum } from '../../../core/enums/roles.enum';
 
-
+@UseGuards(JwtGuard,RolesGuard)
+@Roles(RolesEnum.admin || RolesEnum.superAdmin)
+@ApiBearerAuth()
 @Controller('news-categories/admin')
 export class NewsCategoriesXController {
   constructor(
@@ -27,7 +33,7 @@ export class NewsCategoriesXController {
 
   @Get('/:id')
   @ApiOkResponse({ type: GetOneNewsCategoriesXResponse })
-  async getOne(@Param('id') id: number) {
+  async getOne(@Param('id',ParseIntPipe) id: number) {
     const query = new GetOneNewsCategoriesXRequest();
     query.id = id;
     return await this.queryBus.execute(query);
@@ -41,7 +47,7 @@ export class NewsCategoriesXController {
 
   @Patch('/:id')
   @ApiOkResponse({ type: UpdateNewsCategoriesXResponse })
-  async update(@Param('id') id: number, @Body() payload: UpdateNewsCategoriesXRequest) {
+  async update(@Param('id',ParseIntPipe) id: number, @Body() payload: UpdateNewsCategoriesXRequest) {
     const cmd = new UpdateNewsCategoriesXRequest();
     cmd.id = id;
     cmd.title = payload.title;
@@ -50,7 +56,7 @@ export class NewsCategoriesXController {
 
   @Delete('/:id')
   @ApiOkResponse()
-  async delete(@Param('id') id: number) {
+  async delete(@Param('id',ParseIntPipe) id: number) {
     const cmd = new DeleteNewsCategoriesXRequest();
     cmd.id = id;
     return await this.commandBus.execute(cmd);
