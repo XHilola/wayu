@@ -38,8 +38,7 @@
     "multer": "^2.1.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
-    "typeor": "^1.2.0",
-    "typeorm": "^0.3.28"
+    "typeor": "^1.2.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
