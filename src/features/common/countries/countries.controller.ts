@@ -1,8 +1,6 @@
 import {
   Body,
-  Controller,
-  Delete,
-  Get,
+  Controller, Delete, Get,
   Param,
   ParseIntPipe,
   Patch,
@@ -10,9 +8,14 @@ import {
   UploadedFile,
   UseGuards,
   UseInterceptors,
+  Query
 } from '@nestjs/common';
-import { CommandBus, QueryBus } from '@nestjs/cqrs';
+import { JwtGuard } from '../../../core/guards/jwt.guard';
+import { RolesGuard } from '../../../core/guards/roles.guard';
 import { ApiBearerAuth, ApiConsumes, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
+import { Roles } from '../../../core/decors/roles.decorator';
+import { RolesEnum } from '../../../core/enums/roles.enum';
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { storageOptions } from '../../../config/multer.config';
 import { CreateCountriesXResponse } from './admin/create-countries-x/create-countries-x-response';
@@ -23,7 +26,9 @@ import { UpdateCountriesXResponse } from './admin/update-countries-x/update-coun
 import { UpdateCountriesXRequest } from './admin/update-countries-x/update-countries-x-request';
 import { UpdateCountriesXCommand } from './admin/update-countries-x/update-countries-x-command';
 import { DeleteCountriesXCommand } from './admin/delete-countries-x/delete-countries-x-command';
+import { PaginatedResultDto } from '../../../core/paginatedResult.dto';
 import { GetAllCountriesXResponse } from './admin/get-all-countries-x/get-all-countries-x-response';
+import { PaginationFilter } from '../../../core/filters/pagination.filter';
 import { GetAllCountriesXRequest } from './admin/get-all-countries-x/get-all-countries-x-request';
 import { GetOneCountriesXResponse } from './admin/get-one-countries-x/get-one-countries-x-response';
 import { GetOneCountriesXRequest } from './admin/get-one-countries-x/get-one-countries-x-request';
@@ -31,17 +36,12 @@ import { GetAllCountriesResponse } from './public/get-all-countries/get-all-coun
 import { GetAllCountriesRequest } from './public/get-all-countries/get-all-countries-request';
 import { GetOneCountriesResponse } from './public/get-one-countries/get-one-countries-response';
 import { GetOneCountriesRequest } from './public/get-one-countries/get-one-countries-request';
-import { JwtGuard } from '../../../core/guards/jwt.guard';
-import { RolesGuard } from '../../../core/guards/roles.guard';
-import { Roles } from '../../../core/decors/roles.decorator';
-import { RolesEnum } from '../../../core/enums/roles.enum';
-
-
+import { GetAllCountriesFilter } from './countries-filter';
 
 @Controller('countries/admin/')
-@UseGuards(JwtGuard,RolesGuard)
+@UseGuards(JwtGuard, RolesGuard)
 @ApiBearerAuth()
-@Roles(RolesEnum.admin,RolesEnum.superAdmin)
+@Roles(RolesEnum.admin, RolesEnum.superAdmin)
 export class CountriesControllerX {
   constructor(
     private readonly commandBus: CommandBus,
@@ -91,9 +91,9 @@ export class CountriesControllerX {
   }
 
   @Get()
-  @ApiOkResponse({ type: [GetAllCountriesXResponse] })
-  async getAll() {
-    return await this.queryBus.execute(new GetAllCountriesXRequest());
+  @ApiOkResponse({ type: PaginatedResultDto(GetAllCountriesXResponse) })
+  async getAll(@Query() filter: PaginationFilter) {
+    return await this.queryBus.execute(new GetAllCountriesXRequest(filter));
   }
 
   @Get('get/:id')
@@ -112,11 +112,10 @@ export class CountriesController {
     private readonly queryBus: QueryBus,
   ) {}
 
-
   @Get()
-  @ApiOkResponse({ type: [GetAllCountriesResponse] })
-  async getAll() {
-    return await this.queryBus.execute(new GetAllCountriesRequest());
+  @ApiOkResponse({ type: PaginatedResultDto(GetAllCountriesResponse) })
+  async getAll(@Query() filter: GetAllCountriesFilter) {
+    return await this.queryBus.execute(new GetAllCountriesRequest(filter));
   }
 
   @Get('get/:id')

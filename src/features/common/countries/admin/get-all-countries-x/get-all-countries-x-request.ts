@@ -1,4 +1,16 @@
 import { Query } from '@nestjs/cqrs';
-import { GetAllCountriesXResponse } from './get-all-countries-x-response';
+import { PaginatedResult } from '../../../../../core/paginatedResult.dto';
+import { GetAllCountriesFilter } from '../../countries-filter';
 
-export class GetAllCountriesXRequest extends Query<GetAllCountriesXResponse[]> {}
+export class GetAllCountriesXRequest extends Query<PaginatedResult> {
+  page?: number;
+  size?: number;
+  title?: string
+
+  constructor(filter: GetAllCountriesFilter) {
+    super();
+    this.page = filter.page;
+    this.size = filter.size;
+    this.title=filter.title;
+  }
+}

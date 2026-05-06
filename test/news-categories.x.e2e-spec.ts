@@ -37,82 +37,92 @@ describe('NewsCategoriesXController (e2e)', () => {
 
   //////////////////////Post
 
-  it(
-    'Post admin/news-categories should response with 401',
-    async () => {
-      const res = await request(app.getHttpServer())
-        .post('/news-categories/admin')
-        .send({ title: 'Unauthorized' })
-        .expect(401);
-    },
-  );
-  it(
-    'Post admin/news-categories, response with 201',
-    async () => {
-      const res = await request(app.getHttpServer())
-        .post('/news-categories/admin')
-        .set('Authorization', `Bearer ${jwtToken}`)
-        .send({ title: 'News' })
-        .expect(201);
-
-      expect(res.body).toHaveProperty('id');
-      expect(res.body.title).toBe('News');
-    },
-  );
-
- ////////////////////////Patch
-
-  it(
-    'should PATCH admin/news-categories 401',
-    async () => {
-      const res=await request(app.getHttpServer())
-        .patch('/news-categories/admin/1')
-        .send({title:'Nothing'})
-        .expect(401)
+  it('Post admin/news-categories should response with 401', async () => {
+    await request(app.getHttpServer())
+      .post('/news-categories/admin')
+      .send({ title: 'Unauthorized' })
+      .expect(401);
   });
 
-  it(
-    'should PATCH admin/news-categories 404',
-    async () => {
-      const res=await request(app.getHttpServer())
-        .patch('/news-categories/admin/6')
-        .set('Authorization', `Bearer ${jwtToken}`)
-        .send({title:'Sth'})
-        .expect(404)
-    });
+  it('Post admin/news-categories, response with 201', async () => {
+    const res = await request(app.getHttpServer())
+      .post('/news-categories/admin')
+      .set('Authorization', `Bearer ${jwtToken}`)
+      .send({ title: 'News' })
+      .expect(201);
 
-  it(
-    'should PATCH admin/news-categories 200',
-    async () => {
-      const res=await request(app.getHttpServer())
-        .patch('/news-categories/admin/1')
-        .set('Authorization', `Bearer ${jwtToken}`)
-        .send({title:'Updated'})
-        .expect(200)
-    });
+    expect(res.body).toHaveProperty('id');
+    expect(res.body.title).toBe('News');
+  });
+
+  ////////////////////////Patch
+
+  it('should PATCH admin/news-categories 401', async () => {
+    await request(app.getHttpServer())
+      .patch('/news-categories/admin/1')
+      .send({ title: 'Nothing' })
+      .expect(401);
+  });
+
+  it('should PATCH admin/news-categories 404', async () => {
+    await request(app.getHttpServer())
+      .patch('/news-categories/admin/6')
+      .set('Authorization', `Bearer ${jwtToken}`)
+      .send({ title: 'Sth' })
+      .expect(404);
+  });
+
+  it('should PATCH admin/news-categories 200', async () => {
+    await request(app.getHttpServer())
+      .patch('/news-categories/admin/1')
+      .set('Authorization', `Bearer ${jwtToken}`)
+      .send({ title: 'Updated' })
+      .expect(200);
+  });
 
   //////////////////////Get
-  it(
-    'should GET admin/news-categories 401',
-    async () => {
-      const res=await request(app.getHttpServer())
-        .get('/news-categories/admin')
-        .expect(401)
-    });
 
-  it(
-    'should GET admin/news-categories 200',
-    async () => {
-      const res=await request(app.getHttpServer())
-        .get('/news-categories/admin')
-        .set('Authorization', `Bearer ${jwtToken}`)
-      expect(Array.isArray(res.body)).toBe(true);
-    });
+  it('should GET admin/news-categories 401', async () => {
+    await request(app.getHttpServer())
+      .get('/news-categories/admin')
+      .expect(401);
+  });
+
+  it('should GET admin/news-categories 200', async () => {
+    const res = await request(app.getHttpServer())
+      .get('/news-categories/admin')
+      .set('Authorization', `Bearer ${jwtToken}`)
+      .expect(200);
+
+    expect(Array.isArray(res.body)).toBe(true);
+  });
 
   ///////////////////////Delete
-  it(
-    'should DELETE admin/news-categories ',
-    () => {
 
+  it('should DELETE admin/news-categories 401', async () => {
+    await request(app.getHttpServer())
+      .delete('/news-categories/admin/1')
+      .expect(401);
+  });
+
+  it('should DELETE admin/news-categories 404', async () => {
+    await request(app.getHttpServer())
+      .delete('/news-categories/admin/6')
+      .set('Authorization', `Bearer ${jwtToken}`)
+      .expect(404);
+  });
+
+  it('should DELETE admin/news-categories 200', async () => {
+    await request(app.getHttpServer())
+      .delete('/news-categories/admin/1')
+      .set('Authorization', `Bearer ${jwtToken}`)
+      .expect(200);
+  });
+
+  it('should DELETE admin/news-categories 404 after already deleted', async () => {
+    await request(app.getHttpServer())
+      .delete('/news-categories/admin/1')
+      .set('Authorization', `Bearer ${jwtToken}`)
+      .expect(404);
   });
 });

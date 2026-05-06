@@ -1,21 +1,47 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { plainToInstance } from 'class-transformer';
-import { ConfigService } from '@nestjs/config';
-import { UsefulLinks } from '../../usefulLinks.entity';
 import { GetAllUsefulLinksXRequest } from './get-all-useful-links-x-request';
+import { ConfigService } from '@nestjs/config';
+import { PaginatedResult } from '../../../../../core/paginatedResult.dto';
+import { ILike } from 'typeorm';
+import { UsefulLinks } from '../../usefulLinks.entity';
+import { plainToInstance } from 'class-transformer';
 import { GetAllUsefulLinksXResponse } from './get-all-useful-links-x-response';
 
 @QueryHandler(GetAllUsefulLinksXRequest)
 export class GetAllUsefulLinksXHandler implements IQueryHandler<GetAllUsefulLinksXRequest> {
   constructor(private readonly config: ConfigService) {}
 
-  async execute(query: GetAllUsefulLinksXRequest): Promise<GetAllUsefulLinksXResponse[]> {
-    const usefulLinks = await UsefulLinks.find();
-    const baseUrl = this.config.get<string>('BASE_URL');
-    return usefulLinks.map((usefulLink) => {
-      const res = plainToInstance(GetAllUsefulLinksXResponse, usefulLink, { excludeExtraneousValues: true });
-      res.icon = `${baseUrl}/${usefulLink.icon}`;
+  async execute(query: GetAllUsefulLinksXRequest): Promise<PaginatedResult> {
+    const page = query.page ?? 1;
+    const size = query.size ?? 10;
+    const skip = (page - 1) * size;
+
+    const where: any = {};
+    if (query.title) where.title = ILike(`%${query.title}%`);
+    if (query.link) where.link = ILike(`%${query.link}%`);
+
+    const [links, totalCount] = await UsefulLinks.findAndCount({
+      where: Object.keys(where).length ? where : {},
+      skip,
+      take: size,
+    });
+
+    const baseUrl = this.config.getOrThrow<string>('BASE_URL');
+    const data = links.map((link) => {
+      const res = plainToInstance(GetAllUsefulLinksXResponse, link, { excludeExtraneousValues: true });
+      res.icon = `${baseUrl}/${link.icon}`;
       return res;
     });
+
+    const totalPages = Math.ceil(totalCount / size);
+
+    return {
+      totalPages,
+      previousPage: page > 1 ? page - 1 : undefined,
+      currentPage: page,
+      nextPage: page < totalPages ? page + 1 : undefined,
+      totalCount,
+      data,
+    };
   }
 }

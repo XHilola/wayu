@@ -1,14 +1,4 @@
-import {
-  Body,
-  Controller,
-  Delete, Get,
-  Param,
-  ParseIntPipe,
-  Patch,
-  Post,
-  UploadedFile, UseGuards,
-  UseInterceptors,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiBearerAuth, ApiConsumes, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -33,10 +23,12 @@ import { JwtGuard } from '../../../core/guards/jwt.guard';
 import { RolesGuard } from '../../../core/guards/roles.guard';
 import { Roles } from '../../../core/decors/roles.decorator';
 import { RolesEnum } from '../../../core/enums/roles.enum';
+import { PaginatedResultDto } from '../../../core/paginatedResult.dto';
+import { GetAllInstagramPostsFilter } from './instagram-posts-filter';
 
-@UseGuards(JwtGuard,RolesGuard)
+@UseGuards(JwtGuard, RolesGuard)
 @ApiBearerAuth()
-@Roles(RolesEnum.admin,RolesEnum.superAdmin)
+@Roles(RolesEnum.admin, RolesEnum.superAdmin)
 @Controller('instagram-posts/admin')
 export class InstagramPostsXController {
   constructor(
@@ -87,9 +79,9 @@ export class InstagramPostsXController {
   }
 
   @Get()
-  @ApiOkResponse({ type: [GetAllInstagramPostsXResponse] })
-  async getAll() {
-    return await this.queryBus.execute(new GetAllInstagramPostsXRequest());
+  @ApiOkResponse({ type: PaginatedResultDto(GetAllInstagramPostsXResponse) })
+  async getAll(@Query() filter: GetAllInstagramPostsFilter) {
+    return await this.queryBus.execute(new GetAllInstagramPostsXRequest(filter));
   }
 
   @Get(':id')
@@ -100,6 +92,7 @@ export class InstagramPostsXController {
     return await this.queryBus.execute(query);
   }
 }
+
 @Controller('instagram-posts/')
 export class InstagramPostsController {
   constructor(
@@ -107,11 +100,10 @@ export class InstagramPostsController {
     private readonly queryBus: QueryBus,
   ) {}
 
-
   @Get()
-  @ApiOkResponse({ type: [GetAllInstagramPostsResponse] })
-  async getAll() {
-    return await this.queryBus.execute(new GetAllInstagramPostsRequest());
+  @ApiOkResponse({ type: PaginatedResultDto(GetAllInstagramPostsResponse) })
+  async getAll(@Query() filter: GetAllInstagramPostsFilter) {
+    return await this.queryBus.execute(new GetAllInstagramPostsRequest(filter));
   }
 
   @Get(':id')

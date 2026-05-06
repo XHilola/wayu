@@ -1,5 +1,5 @@
 import { CreateLanguagesXResponse } from './admin/create-languages-x/create-languages-x-response';
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { CreateLanguagesXRequest } from './admin/create-languages-x/create-languages-x-request';
@@ -18,6 +18,8 @@ import { JwtGuard } from '../../../core/guards/jwt.guard';
 import { RolesGuard } from '../../../core/guards/roles.guard';
 import { Roles } from '../../../core/decors/roles.decorator';
 import { RolesEnum } from '../../../core/enums/roles.enum';
+import { GetAllLanguagesFilter } from './languages-filter';
+import { PaginatedResultDto } from '../../../core/paginatedResult.dto';
 
 @UseGuards(JwtGuard,RolesGuard)
 @ApiBearerAuth()
@@ -55,9 +57,9 @@ export class LanguagesXController {
   }
 
   @Get()
-  @ApiOkResponse({ type: [GetAllLanguagesXResponse] })
-  async getAll() {
-    return await this.queryBus.execute(new GetAllLanguagesXRequest());
+  @ApiOkResponse({ type: PaginatedResultDto(GetAllLanguagesXResponse) })
+  async getAll(@Query() filter: GetAllLanguagesFilter) {
+    return await this.queryBus.execute(new GetAllLanguagesXRequest(filter));
   }
 
   @Get(':id')
@@ -78,9 +80,9 @@ export class LanguagesController {
 
 
   @Get()
-  @ApiOkResponse({ type: [GetAllLanguagesResponse] })
-  async getAll() {
-    return await this.queryBus.execute(new GetAllLanguagesRequest());
+  @ApiOkResponse({ type: PaginatedResultDto(GetAllLanguagesResponse) })
+  async getAll(@Query() filter: GetAllLanguagesFilter) {
+    return await this.queryBus.execute(new GetAllLanguagesRequest(filter));
   }
 
   @Get(':id')

@@ -1,4 +1,16 @@
 import { Query } from '@nestjs/cqrs';
-import { GetAllFaqsXResponse } from './get-all-faqs-x-response';
+import { PaginatedResult } from '../../../../../core/paginatedResult.dto';
+import { GetAllFaqsFilter } from '../../faqs-filter';
 
-export class GetAllFaqsXRequest extends Query<GetAllFaqsXResponse[]> {}
+export class GetAllFaqsXRequest extends Query<PaginatedResult> {
+  page?: number;
+  size?: number;
+  question?: string;
+
+  constructor(filter: GetAllFaqsFilter) {
+    super();
+    this.page = filter.page;
+    this.size = filter.size;
+    this.question = filter.question;
+  }
+}

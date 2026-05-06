@@ -1,15 +1,5 @@
 import { CreateUsefulLinksXResponse } from './admin/create-useful-links-x/create-useful-links-x-response';
-import {
-  Body,
-  Controller,
-  Delete, Get,
-  Param,
-  ParseIntPipe,
-  Patch,
-  Post,
-  UploadedFile, UseGuards,
-  UseInterceptors,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiBearerAuth, ApiConsumes, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -33,10 +23,12 @@ import { JwtGuard } from '../../../core/guards/jwt.guard';
 import { RolesGuard } from '../../../core/guards/roles.guard';
 import { Roles } from '../../../core/decors/roles.decorator';
 import { RolesEnum } from '../../../core/enums/roles.enum';
+import { PaginatedResultDto } from '../../../core/paginatedResult.dto';
+import { GetAllUsefulLinksFilter } from './useful-links-filter';
 
-@UseGuards(JwtGuard,RolesGuard)
+@UseGuards(JwtGuard, RolesGuard)
 @ApiBearerAuth()
-@Roles(RolesEnum.admin,RolesEnum.superAdmin)
+@Roles(RolesEnum.admin, RolesEnum.superAdmin)
 @Controller('useful-links/admin')
 export class UsefulLinksXController {
   constructor(
@@ -87,9 +79,9 @@ export class UsefulLinksXController {
   }
 
   @Get()
-  @ApiOkResponse({ type: [GetAllUsefulLinksXResponse] })
-  async getAll() {
-    return await this.queryBus.execute(new GetAllUsefulLinksXRequest());
+  @ApiOkResponse({ type: PaginatedResultDto(GetAllUsefulLinksXResponse) })
+  async getAll(@Query() filter: GetAllUsefulLinksFilter) {
+    return await this.queryBus.execute(new GetAllUsefulLinksXRequest(filter));
   }
 
   @Get(':id')
@@ -109,9 +101,9 @@ export class UsefulLinksController {
   ) {}
 
   @Get()
-  @ApiOkResponse({ type: [GetAllUsefulLinksResponse] })
-  async getAll() {
-    return await this.queryBus.execute(new GetAllUsefulLinksRequest());
+  @ApiOkResponse({ type: PaginatedResultDto(GetAllUsefulLinksResponse) })
+  async getAll(@Query() filter: GetAllUsefulLinksFilter) {
+    return await this.queryBus.execute(new GetAllUsefulLinksRequest(filter));
   }
 
   @Get(':id')

@@ -1,14 +1,4 @@
-import {
-  Body,
-  Controller,
-  Delete, Get,
-  Param,
-  ParseIntPipe,
-  Patch,
-  Post,
-  UploadedFile, UseGuards,
-  UseInterceptors,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiBearerAuth, ApiConsumes, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -33,10 +23,12 @@ import { JwtGuard } from '../../../core/guards/jwt.guard';
 import { RolesGuard } from '../../../core/guards/roles.guard';
 import { Roles } from '../../../core/decors/roles.decorator';
 import { RolesEnum } from '../../../core/enums/roles.enum';
+import { PaginatedResultDto } from '../../../core/paginatedResult.dto';
+import { GetAllSocialLinksFilter } from './social-links-filter';
 
-@UseGuards(JwtGuard,RolesGuard)
+@UseGuards(JwtGuard, RolesGuard)
 @ApiBearerAuth()
-@Roles(RolesEnum.admin,RolesEnum.superAdmin)
+@Roles(RolesEnum.admin, RolesEnum.superAdmin)
 @Controller('social-links/admin')
 export class SocialLinksXController {
   constructor(
@@ -87,9 +79,9 @@ export class SocialLinksXController {
   }
 
   @Get()
-  @ApiOkResponse({ type: [GetAllSocialLinksXResponse] })
-  async getAll() {
-    return await this.queryBus.execute(new GetAllSocialLinksXRequest());
+  @ApiOkResponse({ type: PaginatedResultDto(GetAllSocialLinksXResponse) })
+  async getAll(@Query() filter: GetAllSocialLinksFilter) {
+    return await this.queryBus.execute(new GetAllSocialLinksXRequest(filter));
   }
 
   @Get(':id')
@@ -100,6 +92,7 @@ export class SocialLinksXController {
     return await this.queryBus.execute(query);
   }
 }
+
 @Controller('social-links/')
 export class SocialLinksController {
   constructor(
@@ -108,9 +101,9 @@ export class SocialLinksController {
   ) {}
 
   @Get()
-  @ApiOkResponse({ type: [GetAllSocialLinksResponse] })
-  async getAll() {
-    return await this.queryBus.execute(new GetAllSocialLinksRequest());
+  @ApiOkResponse({ type: PaginatedResultDto(GetAllSocialLinksResponse) })
+  async getAll(@Query() filter: GetAllSocialLinksFilter) {
+    return await this.queryBus.execute(new GetAllSocialLinksRequest(filter));
   }
 
   @Get(':id')

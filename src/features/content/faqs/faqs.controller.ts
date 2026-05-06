@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { CreateFaqsResponse } from './public/create-faqs/create-faqs-response';
@@ -18,7 +18,8 @@ import { JwtGuard } from '../../../core/guards/jwt.guard';
 import { RolesGuard } from '../../../core/guards/roles.guard';
 import { Roles } from '../../../core/decors/roles.decorator';
 import { RolesEnum } from '../../../core/enums/roles.enum';
-
+import { PaginatedResultDto } from '../../../core/paginatedResult.dto';
+import { GetAllFaqsFilter } from './faqs-filter';
 
 @Controller('faqs/')
 export class FaqsController {
@@ -55,9 +56,9 @@ export class FaqsController {
   }
 
   @Get()
-  @ApiOkResponse({ type: [GetAllFaqsResponse] })
-  async getAll() {
-    return await this.queryBus.execute(new GetAllFaqsRequest());
+  @ApiOkResponse({ type: PaginatedResultDto(GetAllFaqsResponse) })
+  async getAll(@Query() filter: GetAllFaqsFilter) {
+    return await this.queryBus.execute(new GetAllFaqsRequest(filter));
   }
 
   @Get('/:id')
@@ -69,21 +70,20 @@ export class FaqsController {
   }
 }
 
-@UseGuards(JwtGuard,RolesGuard)
+@UseGuards(JwtGuard, RolesGuard)
 @ApiBearerAuth()
-@Roles(RolesEnum.admin,RolesEnum.superAdmin)
+@Roles(RolesEnum.admin, RolesEnum.superAdmin)
 @Controller('faqs/admin/')
 export class FaqsXController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
-  ) {
-  }
+  ) {}
 
   @Get('get')
-  @ApiOkResponse({ type: [GetAllFaqsXResponse] })
-  async getAll() {
-    return await this.queryBus.execute(new GetAllFaqsXRequest());
+  @ApiOkResponse({ type: PaginatedResultDto(GetAllFaqsXResponse) })
+  async getAll(@Query() filter: GetAllFaqsFilter) {
+    return await this.queryBus.execute(new GetAllFaqsXRequest(filter));
   }
 
   @Get('/:id')
