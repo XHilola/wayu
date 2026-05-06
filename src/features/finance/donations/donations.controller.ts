@@ -1,6 +1,6 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { GetAllDonationsResponse } from './public/getAll-donations/getAll-donations-response';
 import { GetAllDonationsRequest } from './public/getAll-donations/getAll-donations-request';
 import { CreateDonationsResponse } from './public/create-donations/create-donations-response';
@@ -12,6 +12,11 @@ import { GetAllDonationsXResponse } from './admin/getAll-donations-x/getAll-dona
 import { GetAllDonationsXRequest } from './admin/getAll-donations-x/getAll-donations-x-request';
 import { GetOneDonationsXResponse } from './admin/getOne-donations-x/getOne-donations-x-response';
 import { GetOneDonationsXRequest } from './admin/getOne-donations-x/getOne-donations-x-request';
+import { JwtGuard } from '../../../core/guards/jwt.guard';
+import { RolesGuard } from '../../../core/guards/roles.guard';
+import { Roles } from '../../../core/decors/roles.decorator';
+import { RolesEnum } from '../../../core/enums/roles.enum';
+
 
 @Controller('donations')
 export class DonationsController {
@@ -54,7 +59,9 @@ export class DonationsController {
   }
 }
 
-
+@UseGuards(JwtGuard,RolesGuard)
+@ApiBearerAuth()
+@Roles(RolesEnum.admin,RolesEnum.superAdmin)
 @Controller('donations')
 export class DonationsXController {
   constructor(

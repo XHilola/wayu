@@ -6,11 +6,11 @@ import {
   ParseIntPipe,
   Patch,
   Post,
-  UploadedFile,
+  UploadedFile, UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { ApiConsumes, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { storageOptions } from '../../../config/multer.config';
 import { CreateSocialLinksXResponse } from './admin/create-social-links-x/create-social-links-x-response';
@@ -29,7 +29,14 @@ import { GetAllSocialLinksResponse } from './public/get-all-social-links/get-all
 import { GetAllSocialLinksRequest } from './public/get-all-social-links/get-all-social-links-request';
 import { GetOneSocialLinksResponse } from './public/get-one-social-links/get-one-social-links-response';
 import { GetOneSocialLinksRequest } from './public/get-one-social-links/get-one-social-links-request';
+import { JwtGuard } from '../../../core/guards/jwt.guard';
+import { RolesGuard } from '../../../core/guards/roles.guard';
+import { Roles } from '../../../core/decors/roles.decorator';
+import { RolesEnum } from '../../../core/enums/roles.enum';
 
+@UseGuards(JwtGuard,RolesGuard)
+@ApiBearerAuth()
+@Roles(RolesEnum.admin,RolesEnum.superAdmin)
 @Controller('social-links/admin')
 export class SocialLinksXController {
   constructor(

@@ -1,6 +1,6 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { CreateVacanciesXResponse } from './admin/create-vacancies-x/create-vacancies-x-response';
 import { CreateVacanciesXRequest } from './admin/create-vacancies-x/create-vacancies-x-request';
 import { UpdateVacanciesXResponse } from './admin/update-vacancies-x/update-vacancies-x-response';
@@ -14,7 +14,14 @@ import { GetAllVacanciesResponse } from './public/getAll-vacancies/getAll-vacanc
 import { GetAllVacanciesRequest } from './public/getAll-vacancies/getAll-vacancies-request';
 import { GetOneVacanciesResponse } from './public/getOne-vacancies/getOne-vacancies-response';
 import { GetOneVacanciesRequest } from './public/getOne-vacancies/getOne-vacancies-request';
+import { JwtGuard } from '../../../core/guards/jwt.guard';
+import { RolesGuard } from '../../../core/guards/roles.guard';
+import { Roles } from '../../../core/decors/roles.decorator';
+import { RolesEnum } from '../../../core/enums/roles.enum';
 
+@UseGuards(JwtGuard,RolesGuard)
+@ApiBearerAuth()
+@Roles(RolesEnum.admin,RolesEnum.superAdmin)
 @Controller('vacancies/admin/')
 export class VacanciesXController {
   constructor(

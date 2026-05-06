@@ -7,11 +7,11 @@ import {
   ParseIntPipe,
   Patch,
   Post,
-  UploadedFile,
+  UploadedFile, UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { ApiConsumes, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { storageOptions } from '../../../config/multer.config';
 import { CreateUsefulLinksXRequest } from './admin/create-useful-links-x/create-useful-links-x-request';
@@ -29,7 +29,14 @@ import { GetAllUsefulLinksResponse } from './public/get-all-useful-links/get-all
 import { GetAllUsefulLinksRequest } from './public/get-all-useful-links/get-all-useful-links-request';
 import { GetOneUsefulLinksResponse } from './public/get-one-useful-links/get-one-useful-links-response';
 import { GetOneUsefulLinksRequest } from './public/get-one-useful-links/get-one-useful-links-request';
+import { JwtGuard } from '../../../core/guards/jwt.guard';
+import { RolesGuard } from '../../../core/guards/roles.guard';
+import { Roles } from '../../../core/decors/roles.decorator';
+import { RolesEnum } from '../../../core/enums/roles.enum';
 
+@UseGuards(JwtGuard,RolesGuard)
+@ApiBearerAuth()
+@Roles(RolesEnum.admin,RolesEnum.superAdmin)
 @Controller('useful-links/admin')
 export class UsefulLinksXController {
   constructor(

@@ -6,11 +6,11 @@ import {
   ParseIntPipe,
   Patch,
   Post,
-  UploadedFile,
+  UploadedFile, UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { ApiConsumes, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { storageOptions } from '../../../config/multer.config';
 import { CreateEventsXResponse } from './admin/create-events-x/create-events-x-response';
@@ -28,8 +28,14 @@ import { GetOneEventsXRequest } from './admin/get-one-events-x/get-one-events-x-
 import { GetAllEventsResponse } from './public/get-all-events/get-all-events-response';
 import { GetAllEventsRequest } from './public/get-all-events/get-all-events-request';
 import { GetOneEventsRequest } from './public/get-one-events/get-one-events-request';
+import { JwtGuard } from '../../../core/guards/jwt.guard';
+import { RolesGuard } from '../../../core/guards/roles.guard';
+import { Roles } from '../../../core/decors/roles.decorator';
+import { RolesEnum } from '../../../core/enums/roles.enum';
 
-
+@UseGuards(JwtGuard,RolesGuard)
+@ApiBearerAuth()
+@Roles(RolesEnum.admin,RolesEnum.superAdmin)
 @Controller('events/admin')
 export class EventsXController {
   constructor(

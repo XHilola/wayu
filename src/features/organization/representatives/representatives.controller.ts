@@ -6,11 +6,11 @@ import {
   ParseIntPipe,
   Patch,
   Post,
-  UploadedFile,
+  UploadedFile, UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { ApiConsumes, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { storageOptions } from '../../../config/multer.config';
 import { CreateRepresentativesXResponse } from './admin/create-representatives-x/create-representatives-x-response';
@@ -29,7 +29,14 @@ import { GetAllRepresentativesResponse } from './public/getAll-representatives/g
 import { GetAllRepresentativesRequest } from './public/getAll-representatives/getAll-representatives-request';
 import { GetOneRepresentativesResponse } from './public/getOne-representatives/getOne-representatives-response';
 import { GetOneRepresentativesRequest } from './public/getOne-representatives/getOne-representatives-request';
+import { JwtGuard } from '../../../core/guards/jwt.guard';
+import { RolesGuard } from '../../../core/guards/roles.guard';
+import { Roles } from '../../../core/decors/roles.decorator';
+import { RolesEnum } from '../../../core/enums/roles.enum';
 
+@UseGuards(JwtGuard,RolesGuard)
+@ApiBearerAuth()
+@Roles(RolesEnum.admin,RolesEnum.superAdmin)
 @Controller('representatives/admin/')
 export class RepresentativesXController {
   constructor(

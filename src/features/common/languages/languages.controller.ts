@@ -1,7 +1,7 @@
 import { CreateLanguagesXResponse } from './admin/create-languages-x/create-languages-x-response';
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { CreateLanguagesXRequest } from './admin/create-languages-x/create-languages-x-request';
 import { UpdateLanguagesXResponse } from './admin/update-languages-x/update-languages-x-response';
 import { UpdateLanguagesXRequest } from './admin/update-languages-x/update-languages-x-request';
@@ -14,8 +14,14 @@ import { GetAllLanguagesResponse } from './public/get-all-languages/get-all-lang
 import { GetAllLanguagesRequest } from './public/get-all-languages/get-all-languages-request';
 import { GetOneLanguagesResponse } from './public/get-one-languages/get-one-languages-response';
 import { GetOneLanguagesRequest } from './public/get-one-languages/get-one-languages-request';
+import { JwtGuard } from '../../../core/guards/jwt.guard';
+import { RolesGuard } from '../../../core/guards/roles.guard';
+import { Roles } from '../../../core/decors/roles.decorator';
+import { RolesEnum } from '../../../core/enums/roles.enum';
 
-
+@UseGuards(JwtGuard,RolesGuard)
+@ApiBearerAuth()
+@Roles(RolesEnum.admin,RolesEnum.superAdmin)
 @Controller('languages/admin')
 export class LanguagesXController {
   constructor(

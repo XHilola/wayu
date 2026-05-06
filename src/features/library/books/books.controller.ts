@@ -7,10 +7,10 @@ import {
   ParseIntPipe,
   Patch,
   Post,
-  UploadedFiles,
+  UploadedFiles, UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiConsumes, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { storageOptions } from '../../../config/multer.config';
 import { CreateBooksXResponse } from './admin/create-books-x/create-books-x-response';
@@ -29,7 +29,14 @@ import { GetAllBooksResponse } from './public/getAll-books/getAll-books-response
 import { GetAllBooksRequest } from './public/getAll-books/getAll-books-request';
 import { GetOneBooksResponse } from './public/getOne-books/getOne-books-response';
 import { GetOneBooksRequest } from './public/getOne-books/getOne-books-request';
+import { JwtGuard } from '../../../core/guards/jwt.guard';
+import { RolesGuard } from '../../../core/guards/roles.guard';
+import { Roles } from '../../../core/decors/roles.decorator';
+import { RolesEnum } from '../../../core/enums/roles.enum';
 
+@UseGuards(JwtGuard,RolesGuard)
+@ApiBearerAuth()
+@Roles(RolesEnum.admin,RolesEnum.superAdmin)
 @Controller('books/admin')
 export class BooksXController {
   constructor(

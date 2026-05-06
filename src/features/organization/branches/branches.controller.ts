@@ -1,6 +1,6 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { GetAllBranchesResponse } from './public/getAll-branches/getAll-branches-response';
 import { GetAllBranchesXResponse } from './admin/getAll-branches-x/getAll-branches-x-response';
 import { GetAllBranchesXRequest } from './admin/getAll-branches-x/getAll-branches-x-request';
@@ -14,7 +14,14 @@ import { DeleteBranchesXRequest } from './admin/delete-branches-x/delete-branche
 import { GetAllBranchesRequest } from './public/getAll-branches/getAll-branches-request';
 import { GetOneBranchesResponse } from './public/getOne-branches/getOne-branches-response';
 import { GetOneBranchesRequest } from './public/getOne-branches/getOne-branches-request';
+import { JwtGuard } from '../../../core/guards/jwt.guard';
+import { RolesGuard } from '../../../core/guards/roles.guard';
+import { Roles } from '../../../core/decors/roles.decorator';
+import { RolesEnum } from '../../../core/enums/roles.enum';
 
+@UseGuards(JwtGuard,RolesGuard)
+@ApiBearerAuth()
+@Roles(RolesEnum.admin,RolesEnum.superAdmin)
 @Controller('branches/admin')
 export class BranchesXController {
   constructor(

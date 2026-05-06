@@ -1,6 +1,6 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { UpdateStaticInfoXResponse } from './admin/update-static-info-x/update-static-info-x-response';
 import { UpdateStaticInfoXRequest } from './admin/update-static-info-x/update-static-info-x-request';
 import { GetOneStaticInfoXResponse } from './admin/get-one-static-info-x/get-one-static-info-x-response';
@@ -14,8 +14,15 @@ import { GetOneStaticInfoResponse } from './public/get-one-static-info/get-one-s
 import { GetOneStaticInfoRequest } from './public/get-one-static-info/get-one-static-info-request';
 import { GetAllStaticInfoResponse } from './public/get-all-static-info/get-all-static-info-response';
 import { GetAllStaticInfoRequest } from './public/get-all-static-info/get-all-static-info-request';
+import { JwtGuard } from '../../../core/guards/jwt.guard';
+import { RolesGuard } from '../../../core/guards/roles.guard';
+import { Roles } from '../../../core/decors/roles.decorator';
+import { RolesEnum } from '../../../core/enums/roles.enum';
 
 
+@UseGuards(JwtGuard,RolesGuard)
+@ApiBearerAuth()
+@Roles(RolesEnum.admin,RolesEnum.superAdmin)
 @Controller('static-info/admin')
 export class StaticInfoXController {
   constructor(

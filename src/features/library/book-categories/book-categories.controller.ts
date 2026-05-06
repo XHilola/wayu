@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { CreateBookCategoriesXRequest } from './admin/create-book-categories-x/create-book-categories-x-request';
 import { DeleteBookCategoryXRequest } from './admin/delete-book-categories-x/delete-book-category-x-request';
@@ -7,7 +7,15 @@ import { GetAllBookCategoryXRequest } from './admin/getAll-book-category-x/getAl
 import { GetOneBookCategoryXRequest } from './admin/getOne-book-category-x/getOne-book-category-x-request';
 import { GetAllBookCategoryRequest } from './public/getAll-book-category/getAll-book-category-request';
 import { GetOneBookCategoryRequest } from './public/getOne-book-category/getOne-book-category-request';
+import { JwtGuard } from '../../../core/guards/jwt.guard';
+import { RolesGuard } from '../../../core/guards/roles.guard';
+import { ApiBearerAuth } from '@nestjs/swagger';
+import { Roles } from '../../../core/decors/roles.decorator';
+import { RolesEnum } from '../../../core/enums/roles.enum';
 
+@UseGuards(JwtGuard,RolesGuard)
+@ApiBearerAuth()
+@Roles(RolesEnum.admin,RolesEnum.superAdmin)
 @Controller('bookCategories/admin')
 export class BookCategoriesXController{
   constructor(

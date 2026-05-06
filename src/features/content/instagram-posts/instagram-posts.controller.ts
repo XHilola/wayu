@@ -6,11 +6,11 @@ import {
   ParseIntPipe,
   Patch,
   Post,
-  UploadedFile,
+  UploadedFile, UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { ApiConsumes, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { storageOptions } from '../../../config/multer.config';
 import { CreateInstagramPostsXResponse } from './admin/create-instagram-posts-x/create-instagram-posts-x-response';
@@ -29,8 +29,14 @@ import { GetAllInstagramPostsResponse } from './public/get-all-instagram-posts/g
 import { GetAllInstagramPostsRequest } from './public/get-all-instagram-posts/get-all-instagram-posts-request';
 import { GetOneInstagramPostsResponse } from './public/get-one-instagram-posts/get-one-instagram-posts-response';
 import { GetOneInstagramPostsRequest } from './public/get-one-instagram-posts/get-one-instagram-posts-request';
+import { JwtGuard } from '../../../core/guards/jwt.guard';
+import { RolesGuard } from '../../../core/guards/roles.guard';
+import { Roles } from '../../../core/decors/roles.decorator';
+import { RolesEnum } from '../../../core/enums/roles.enum';
 
-
+@UseGuards(JwtGuard,RolesGuard)
+@ApiBearerAuth()
+@Roles(RolesEnum.admin,RolesEnum.superAdmin)
 @Controller('instagram-posts/admin')
 export class InstagramPostsXController {
   constructor(

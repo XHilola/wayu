@@ -12,7 +12,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { ApiConsumes, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { storageOptions } from '../../../config/multer.config';
 import { CreateCountriesXResponse } from './admin/create-countries-x/create-countries-x-response';
@@ -40,6 +40,7 @@ import { RolesEnum } from '../../../core/enums/roles.enum';
 
 @Controller('countries/admin/')
 @UseGuards(JwtGuard,RolesGuard)
+@ApiBearerAuth()
 @Roles(RolesEnum.admin,RolesEnum.superAdmin)
 export class CountriesControllerX {
   constructor(

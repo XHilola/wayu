@@ -1,7 +1,7 @@
 import { GetOneQuestionsResponse } from './public/getOne-expenses/getOne-expenses-response';
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { GetAllQuestionsResponse } from './public/getAll-questions/getAll-expenses-response';
 import { GetAllQuestionsRequest } from './public/getAll-questions/getAll-expenses-request';
 import { GetOneQuestionsRequest } from './public/getOne-expenses/getOne-expenses-request';
@@ -14,6 +14,10 @@ import { GetAllQuestionsXResponse } from './admin/getAll-questions-X/getAll-expe
 import { GetAllQuestionsXRequest } from './admin/getAll-questions-X/getAll-expenses-x-request';
 import { GetOneQuestionsXResponse } from './admin/getOne-expenses-x/getOne-expenses-x-response';
 import { GetOneQuestionsXRequest } from './admin/getOne-expenses-x/getOne-expenses-x-request';
+import { JwtGuard } from '../../../core/guards/jwt.guard';
+import { RolesGuard } from '../../../core/guards/roles.guard';
+import { Roles } from '../../../core/decors/roles.decorator';
+import { RolesEnum } from '../../../core/enums/roles.enum';
 
 
 @Controller('questions/')
@@ -63,6 +67,10 @@ export class QuestionsController {
     return await this.commandBus.execute(cmd);
   }
 }
+
+@UseGuards(JwtGuard,RolesGuard)
+@ApiBearerAuth()
+@Roles(RolesEnum.admin,RolesEnum.superAdmin)
 @Controller('questions/admin/')
 export class QuestionsXController {
   constructor(

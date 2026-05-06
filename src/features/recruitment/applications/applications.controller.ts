@@ -7,10 +7,10 @@ import {
   ParseIntPipe,
   Patch,
   Post,
-  UploadedFile,
+  UploadedFile, UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiConsumes, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { storageOptions } from '../../../config/multer.config';
 import { CreateApplicationsResponse } from './public/create-applications/create-applications-response';
@@ -29,6 +29,10 @@ import { GetAllApplicationsXResponse } from './admin/getAll-applications-x/getAl
 import { GetAllApplicationsXRequest } from './admin/getAll-applications-x/getAll-applications-x-request';
 import { GetOneApplicationsXResponse } from './admin/getOne-applications-x/getOne-applications-x-response';
 import { GetOneApplicationsXRequest } from './admin/getOne-applications-x/getOne-applications-x-request';
+import { JwtGuard } from '../../../core/guards/jwt.guard';
+import { RolesGuard } from '../../../core/guards/roles.guard';
+import { Roles } from '../../../core/decors/roles.decorator';
+import { RolesEnum } from '../../../core/enums/roles.enum';
 
 
 @Controller('applications/')
@@ -108,6 +112,10 @@ export class ApplicationsController {
     return await this.queryBus.execute(query);
   }
 }
+
+@UseGuards(JwtGuard,RolesGuard)
+@ApiBearerAuth()
+@Roles(RolesEnum.admin,RolesEnum.superAdmin)
 @Controller('applications/admin/')
 export class ApplicationsXController {
   constructor(

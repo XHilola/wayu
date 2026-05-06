@@ -1,6 +1,6 @@
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
-import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
+import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { GetAllExpensesXResponse } from './admin/getAll-expenses-x/getAll-expenses-x-response';
 import { GetAllExpensesXRequest } from './admin/getAll-expenses-x/getAll-expenses-x-request';
 import { GetOneExpensesXResponse } from './admin/getOne-expenses-x/getOne-expenses-x-response';
@@ -14,7 +14,14 @@ import { GetAllExpensesResponse } from './public/getAll-expenses/getAll-expenses
 import { GetAllExpensesRequest } from './public/getAll-expenses/getAll-expenses-request';
 import { GetOneExpensesResponse } from './public/getOne-expenses/getOne-expenses-response';
 import { GetOneExpensesRequest } from './public/getOne-expenses/getOne-expenses-request';
+import { JwtGuard } from '../../../core/guards/jwt.guard';
+import { RolesGuard } from '../../../core/guards/roles.guard';
+import { Roles } from '../../../core/decors/roles.decorator';
+import { RolesEnum } from '../../../core/enums/roles.enum';
 
+@UseGuards(JwtGuard,RolesGuard)
+@ApiBearerAuth()
+@Roles(RolesEnum.admin,RolesEnum.superAdmin)
 @Controller('expenses/admin')
 export class ExpensesXController {
   constructor(

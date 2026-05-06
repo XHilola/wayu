@@ -6,11 +6,11 @@ import {
   ParseIntPipe,
   Patch,
   Post,
-  UploadedFile,
+  UploadedFile, UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { ApiConsumes, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { storageOptions } from '../../../config/multer.config';
 import { CreateNewsXResponse } from './admin/create-news-x/create-news-x-response';
@@ -29,7 +29,14 @@ import { GetAllNewsResponse } from './public/getAll-news/getAll-news-response';
 import { GetAllNewsRequest } from './public/getAll-news/getAll-news-request';
 import { GetOneNewsResponse } from './public/getOne-news/getOne-news-response';
 import { GetOneNewsRequest } from './public/getOne-news/getOne-news-request';
+import { JwtGuard } from '../../../core/guards/jwt.guard';
+import { RolesGuard } from '../../../core/guards/roles.guard';
+import { Roles } from '../../../core/decors/roles.decorator';
+import { RolesEnum } from '../../../core/enums/roles.enum';
 
+@UseGuards(JwtGuard,RolesGuard)
+@ApiBearerAuth()
+@Roles(RolesEnum.admin,RolesEnum.superAdmin)
 @Controller('news/admin/')
 export class NewsXController {
   constructor(

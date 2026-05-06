@@ -1,6 +1,6 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { CreateEventCategoriesXResponse } from './admin/create-event-categories-x/create-event-categories-x-response';
 import { CreateEventCategoriesXRequest } from './admin/create-event-categories-x/create-event-categories-x-request';
 import { UpdateEventCategoriesXResponse } from './admin/update-event-categories-x/update-event-categories-x-response';
@@ -14,7 +14,14 @@ import { GetAllEventCategoriesResponse } from './public/get-all-event-categories
 import { GetAllEventCategoriesRequest } from './public/get-all-event-categories/get-all-event-categories-request';
 import { GetOneEventCategoriesRequest } from './public/get-one-event-categories/get-one-event-categories-request';
 import { GetOneEventCategoriesResponse } from './public/get-one-event-categories/get-one-event-categories-response';
+import { JwtGuard } from '../../../core/guards/jwt.guard';
+import { RolesGuard } from '../../../core/guards/roles.guard';
+import { Roles } from '../../../core/decors/roles.decorator';
+import { RolesEnum } from '../../../core/enums/roles.enum';
 
+@UseGuards(JwtGuard,RolesGuard)
+@ApiBearerAuth()
+@Roles(RolesEnum.admin,RolesEnum.superAdmin)
 @Controller('event-categories/admin')
 export class EventCategoriesXController {
   constructor(

@@ -1,6 +1,6 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { GetAllTagsXResponse } from './admin/getAll-tags-x/getAll-tags-x-response';
 import { GetAllTagsXRequest } from './admin/getAll-tags-x/getAll-tags-x-request';
 import { GetOneTagsXResponse } from './admin/getOne-tags-x/getOne-tags-x-response';
@@ -14,7 +14,14 @@ import { GetAllTagsResponse } from './public/getAll-tags/getAll-tags-response';
 import { GetAllTagsRequest } from './public/getAll-tags/getAll-tags-request';
 import { GetOneTagsResponse } from './public/getOne-tags/getOne-tags-response';
 import { GetOneTagsRequest } from './public/getOne-tags/getOne-tags-request';
+import { JwtGuard } from '../../../core/guards/jwt.guard';
+import { RolesGuard } from '../../../core/guards/roles.guard';
+import { Roles } from '../../../core/decors/roles.decorator';
+import { RolesEnum } from '../../../core/enums/roles.enum';
 
+@UseGuards(JwtGuard,RolesGuard)
+@ApiBearerAuth()
+@Roles(RolesEnum.admin,RolesEnum.superAdmin)
 @Controller('tags/admin')
 export class TagsXController {
   constructor(

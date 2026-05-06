@@ -1,6 +1,6 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { CreateFaqsResponse } from './public/create-faqs/create-faqs-response';
 import { CreateFaqsRequest } from './public/create-faqs/create-faqs-request';
 import { UpdateFaqsResponse } from './public/update-faqs/update-faqs-response';
@@ -14,6 +14,10 @@ import { GetAllFaqsXResponse } from './admin/get-all-faqs-x/get-all-faqs-x-respo
 import { GetAllFaqsXRequest } from './admin/get-all-faqs-x/get-all-faqs-x-request';
 import { GetOneFaqsXResponse } from './admin/get-one-faqs-x/get-one-faqs-x-response';
 import { GetOneFaqsXRequest } from './admin/get-one-faqs-x/get-one-faqs-x-request';
+import { JwtGuard } from '../../../core/guards/jwt.guard';
+import { RolesGuard } from '../../../core/guards/roles.guard';
+import { Roles } from '../../../core/decors/roles.decorator';
+import { RolesEnum } from '../../../core/enums/roles.enum';
 
 
 @Controller('faqs/')
@@ -65,6 +69,9 @@ export class FaqsController {
   }
 }
 
+@UseGuards(JwtGuard,RolesGuard)
+@ApiBearerAuth()
+@Roles(RolesEnum.admin,RolesEnum.superAdmin)
 @Controller('faqs/admin/')
 export class FaqsXController {
   constructor(
@@ -73,7 +80,7 @@ export class FaqsXController {
   ) {
   }
 
-  @Get()
+  @Get('get')
   @ApiOkResponse({ type: [GetAllFaqsXResponse] })
   async getAll() {
     return await this.queryBus.execute(new GetAllFaqsXRequest());
