@@ -5,19 +5,27 @@ import { GetAllCountriesXRequest } from './get-all-countries-x-request';
 import { GetAllCountriesXResponse } from './get-all-countries-x-response';
 import { ConfigService } from '@nestjs/config';
 import { PaginatedResult } from '../../../../../core/paginatedResult.dto';
+import {Cache} from '@nestjs/cache-manager';
 
 @QueryHandler(GetAllCountriesXRequest)
 export class GetAllCountriesXHandler implements IQueryHandler<GetAllCountriesXRequest> {
-  constructor(private readonly config: ConfigService) {}
+  constructor(
+    private readonly config: ConfigService,
+    private readonly cache:Cache
+    ) {}
 
   async execute(query: GetAllCountriesXRequest): Promise<PaginatedResult> {
-    const page = query.page ?? 1;
-    const size = query.size ?? 10;
-    const skip = (page - 1) * size;
+    const take = query.size ?? this.config.getOrThrow<number>('DEFAULT_SIZE');
+    const currentPage = query.page ?? 1;
+    const cachedData=await this.cache.get<PaginatedResult>(`country:${currentPage}:${take}`)
+    if (cachedData){
+      return cachedData
+    }
+    const skip = (currentPage - 1) * take;
 
     const [countries, totalCount] = await Countries.findAndCount({
       skip,
-      take: size,
+      take,
     });
 
     const baseUrl = this.config.getOrThrow<string>('BASE_URL');
@@ -27,15 +35,17 @@ export class GetAllCountriesXHandler implements IQueryHandler<GetAllCountriesXRe
       return res;
     });
 
-    const totalPages = Math.ceil(totalCount / size);
+    const totalPages = Math.ceil(totalCount / take);
 
-    return {
+    const payload= {
       totalPages,
-      previousPage: page > 1 ? page - 1 : undefined,
-      currentPage: page,
-      nextPage: page < totalPages ? page + 1 : undefined,
+      previousPage: currentPage > 1 ? currentPage - 1 : undefined,
+      currentPage,
+      nextPage: currentPage < totalPages ? currentPage + 1 : undefined,
       totalCount,
       data,
     };
+    await this.cache.set(`country:${currentPage}:${take}`,payload)
+    return payload
   }
 }

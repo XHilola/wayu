@@ -17,9 +17,8 @@ describe('BooksController (e2e)', () => {
   beforeAll(async () => {
     ({ app, dataSource } = await createTestApp());
     const password = await argon2.hash('qwer');
-    await dataSource.query(`INSERT INTO users ("fullName", "login", "loginType", "isVerified", "isActive", "role", "password")
-                            VALUES ('Ali', 'ali@gmail.com', 'email', true, true, 'superAdmin', '${password}')`);
-    // Seed author and book category so books can reference valid foreign keys
+    await dataSource.query(`INSERT INTO users ("fullName", "login", "loginType", "isActive", "role", "password")
+                            VALUES ('Ali', 'ali@gmail.com', 'email', true,  'superAdmin', '${password}')`);
     await dataSource.query(`INSERT INTO authors ("fullName") VALUES ('Leo Tolstoy')`);
     await dataSource.query(`INSERT INTO book_categories ("title") VALUES ('Fiction')`);
   });
@@ -58,11 +57,11 @@ describe('BooksController (e2e)', () => {
       .field('authorId', '1')
       .field('categoryId', '1')
       .field('title', 'War and Peace')
-      .field('pages', '1225')
+      .field('pages', '665')
       .field('year', '1869')
-      .field('description', 'A classic novel')
-      .attach('image', path.resolve(__dirname, './fixtures/test-image.png'))
-      .attach('file', path.resolve(__dirname, './fixtures/test-book.pdf'))
+      .field('description', 'A novel')
+      .attach('image', path.resolve(__dirname, 'test.png'))
+      .attach('file', path.resolve(__dirname, 'test.pdf'))
       .expect(201);
 
     expect(res.body).toHaveProperty('id');

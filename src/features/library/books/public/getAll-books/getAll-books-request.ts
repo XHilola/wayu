@@ -1,4 +1,22 @@
 import { Query } from '@nestjs/cqrs';
-import { GetAllBooksResponse } from './getAll-books-response';
+import { PaginatedResult } from '../../../../../core/paginatedResult.dto';
+import { GetAllBooksFilter } from '../../books-filter';
 
-export class GetAllBooksRequest extends Query<GetAllBooksResponse[]> {}
+export class GetAllBooksRequest extends Query<PaginatedResult> {
+  page?: number;
+  size?: number;
+  title?: string;
+  authorId?: number;
+  categoryId?: number;
+  year?: number;
+
+  constructor(filter: GetAllBooksFilter) {
+    super();
+    this.page = filter.page;
+    this.size = filter.size;
+    this.title = filter.title;
+    this.authorId = filter.authorId;
+    this.categoryId = filter.categoryId;
+    this.year = filter.year;
+  }
+}

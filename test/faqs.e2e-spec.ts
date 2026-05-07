@@ -16,8 +16,8 @@ describe('FaqsController (e2e)', () => {
   beforeAll(async () => {
     ({ app, dataSource } = await createTestApp());
     const password = await argon2.hash('qwer');
-    await dataSource.query(`INSERT INTO users ("fullName", "login", "loginType", "isVerified", "isActive", "role", "password")
-                            VALUES ('Ali', 'ali@gmail.com', 'email', true, true, 'superAdmin', '${password}')`);
+    await dataSource.query(`INSERT INTO users ("fullName", "login", "loginType",  "isActive", "role", "password")
+                            VALUES ('Ali', 'ali@gmail.com', 'email', true, 'superAdmin', '${password}')`);
   });
   afterAll(async () => await teardownTestApp(app, dataSource));
 

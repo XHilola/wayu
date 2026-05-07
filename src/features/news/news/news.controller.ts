@@ -1,14 +1,4 @@
-import {
-  Body,
-  Controller,
-  Delete, Get,
-  Param,
-  ParseIntPipe,
-  Patch,
-  Post,
-  UploadedFile, UseGuards,
-  UseInterceptors,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiBearerAuth, ApiConsumes, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -33,10 +23,12 @@ import { JwtGuard } from '../../../core/guards/jwt.guard';
 import { RolesGuard } from '../../../core/guards/roles.guard';
 import { Roles } from '../../../core/decors/roles.decorator';
 import { RolesEnum } from '../../../core/enums/roles.enum';
+import { PaginatedResultDto } from '../../../core/paginatedResult.dto';
+import { GetAllNewsFilter } from './news-filter';
 
-@UseGuards(JwtGuard,RolesGuard)
+@UseGuards(JwtGuard, RolesGuard)
 @ApiBearerAuth()
-@Roles(RolesEnum.admin,RolesEnum.superAdmin)
+@Roles(RolesEnum.admin, RolesEnum.superAdmin)
 @Controller('news/admin/')
 export class NewsXController {
   constructor(
@@ -104,9 +96,9 @@ export class NewsXController {
   }
 
   @Get()
-  @ApiOkResponse({ type: [GetAllNewsXResponse] })
-  async getAll() {
-    return await this.queryBus.execute(new GetAllNewsXRequest());
+  @ApiOkResponse({ type: PaginatedResultDto(GetAllNewsXResponse) })
+  async getAll(@Query() filter: GetAllNewsFilter) {
+    return await this.queryBus.execute(new GetAllNewsXRequest(filter));
   }
 
   @Get(':id')
@@ -118,7 +110,6 @@ export class NewsXController {
   }
 }
 
-
 @Controller('news/')
 export class NewsController {
   constructor(
@@ -126,11 +117,10 @@ export class NewsController {
     private readonly queryBus: QueryBus,
   ) {}
 
-
   @Get()
-  @ApiOkResponse({ type: [GetAllNewsResponse] })
-  async getAll() {
-    return await this.queryBus.execute(new GetAllNewsRequest());
+  @ApiOkResponse({ type: PaginatedResultDto(GetAllNewsResponse) })
+  async getAll(@Query() filter: GetAllNewsFilter) {
+    return await this.queryBus.execute(new GetAllNewsRequest(filter));
   }
 
   @Get(':id')

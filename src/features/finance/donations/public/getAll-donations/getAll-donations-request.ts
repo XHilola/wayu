@@ -1,4 +1,18 @@
 import { Query } from '@nestjs/cqrs';
-import { GetAllDonationsResponse } from './getAll-donations-response';
+import { PaginatedResult } from '../../../../../core/paginatedResult.dto';
+import { GetAllDonationsFilter } from '../../donations-filter';
 
-export class GetAllDonationsRequest extends Query<GetAllDonationsResponse[]> {}
+export class GetAllDonationsRequest extends Query<PaginatedResult> {
+  page?: number;
+  size?: number;
+  fullName?: string;
+  paidBy?: string;
+
+  constructor(filter: GetAllDonationsFilter) {
+    super();
+    this.page = filter.page;
+    this.size = filter.size;
+    this.fullName = filter.fullName;
+    this.paidBy = filter.paidBy;
+  }
+}

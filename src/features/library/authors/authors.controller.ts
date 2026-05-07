@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { GetAllAuthorsXResponse } from './admin/getAll-authors-x/getAll-authors-x-response';
@@ -18,74 +18,75 @@ import { JwtGuard } from '../../../core/guards/jwt.guard';
 import { RolesGuard } from '../../../core/guards/roles.guard';
 import { Roles } from '../../../core/decors/roles.decorator';
 import { RolesEnum } from '../../../core/enums/roles.enum';
+import { PaginatedResultDto } from '../../../core/paginatedResult.dto';
+import { GetAllAuthorsFilter } from './authors-filter';
 
-@UseGuards(JwtGuard,RolesGuard)
+@UseGuards(JwtGuard, RolesGuard)
 @ApiBearerAuth()
-@Roles(RolesEnum.admin,RolesEnum.superAdmin)
+@Roles(RolesEnum.admin, RolesEnum.superAdmin)
 @Controller('authors/admin')
 export class AuthorsXController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
-  ) {
-  }
+  ) {}
 
   @Get()
-  @ApiOkResponse({type:GetAllAuthorsXResponse})
-  async getAll() {
-    return await this.queryBus.execute(new GetAllAuthorsXRequest())
+  @ApiOkResponse({ type: PaginatedResultDto(GetAllAuthorsXResponse) })
+  async getAll(@Query() filter: GetAllAuthorsFilter) {
+    return await this.queryBus.execute(new GetAllAuthorsXRequest(filter));
   }
 
   @Get('/:id')
-  @ApiOkResponse({type:GetOneAuthorsXResponse})
-  async getOne(@Param('id') id:number){
-    const author=new GetOneAuthorsXRequest()
-    author.id=id
-    return await this.queryBus.execute(author)
+  @ApiOkResponse({ type: GetOneAuthorsXResponse })
+  async getOne(@Param('id') id: number) {
+    const author = new GetOneAuthorsXRequest();
+    author.id = id;
+    return await this.queryBus.execute(author);
   }
 
   @Post()
-  @ApiCreatedResponse({type:CreateAuthorsXResponse})
-  async create(@Body() payload:CreateAuthorsXRequest){
-    return await this.commandBus.execute(payload)
+  @ApiCreatedResponse({ type: CreateAuthorsXResponse })
+  async create(@Body() payload: CreateAuthorsXRequest) {
+    return await this.commandBus.execute(payload);
   }
 
   @Patch('/:id')
-  @ApiOkResponse({type:UpdateAuthorXResponse})
-  async update(@Param('id') id:number,@Body() payload:UpdateAuthorXRequest){
-    const cmd=new UpdateAuthorXRequest()
-    cmd.id=id
-    cmd.fullName=payload.fullName
-    return await this.commandBus.execute(cmd)
+  @ApiOkResponse({ type: UpdateAuthorXResponse })
+  async update(@Param('id') id: number, @Body() payload: UpdateAuthorXRequest) {
+    const cmd = new UpdateAuthorXRequest();
+    cmd.id = id;
+    cmd.fullName = payload.fullName;
+    return await this.commandBus.execute(cmd);
   }
 
   @Delete('/:id')
   @ApiOkResponse()
-  async delete(@Param("id") id:number){
-    const cmd=new DeleteAuthorsXRequest()
-    cmd.id=id
-    return await this.commandBus.execute(cmd)
+  async delete(@Param('id') id: number) {
+    const cmd = new DeleteAuthorsXRequest();
+    cmd.id = id;
+    return await this.commandBus.execute(cmd);
   }
 }
+
 @Controller('authors')
 export class AuthorsController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
-  ) {
-  }
+  ) {}
 
   @Get()
-  @ApiOkResponse({type:GetAllAuthorsResponse})
-  async getAll() {
-    return await this.queryBus.execute(new GetAllAuthorsRequest())
+  @ApiOkResponse({ type: PaginatedResultDto(GetAllAuthorsResponse) })
+  async getAll(@Query() filter: GetAllAuthorsFilter) {
+    return await this.queryBus.execute(new GetAllAuthorsRequest(filter));
   }
 
   @Get('/:id')
-  @ApiOkResponse({type:GetOneAuthorsResponse})
-  async getOne(@Param('id') id:number){
-    const author=new GetOneAuthorsRequest()
-    author.id=id
-    return await this.queryBus.execute(author)
+  @ApiOkResponse({ type: GetOneAuthorsResponse })
+  async getOne(@Param('id') id: number) {
+    const author = new GetOneAuthorsRequest();
+    author.id = id;
+    return await this.queryBus.execute(author);
   }
 }

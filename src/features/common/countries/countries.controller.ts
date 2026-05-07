@@ -38,7 +38,7 @@ import { GetOneCountriesResponse } from './public/get-one-countries/get-one-coun
 import { GetOneCountriesRequest } from './public/get-one-countries/get-one-countries-request';
 import { GetAllCountriesFilter } from './countries-filter';
 
-@Controller('countries/admin/')
+@Controller('countries/admin')
 @UseGuards(JwtGuard, RolesGuard)
 @ApiBearerAuth()
 @Roles(RolesEnum.admin, RolesEnum.superAdmin)
@@ -48,7 +48,7 @@ export class CountriesControllerX {
     private readonly queryBus: QueryBus,
   ) {}
 
-  @Post('create')
+  @Post('/create')
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('flag', { storage: storageOptions, limits: { fileSize: 1024 * 1024 * 6 } }))
   @ApiCreatedResponse({ type: CreateCountriesXResponse })
@@ -65,7 +65,7 @@ export class CountriesControllerX {
     }
   }
 
-  @Patch('patch/:id')
+  @Patch('/patch/:id')
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('flag', { storage: storageOptions, limits: { fileSize: 1024 * 1024 * 6 } }))
   @ApiOkResponse({ type: UpdateCountriesXResponse })
@@ -83,7 +83,7 @@ export class CountriesControllerX {
     }
   }
 
-  @Delete('delete/:id')
+  @Delete('/delete/:id')
   async delete(@Param('id', ParseIntPipe) id: number) {
     const cmd = new DeleteCountriesXCommand();
     cmd.id = id;
@@ -96,7 +96,7 @@ export class CountriesControllerX {
     return await this.queryBus.execute(new GetAllCountriesXRequest(filter));
   }
 
-  @Get('get/:id')
+  @Get('/:id')
   @ApiOkResponse({ type: GetOneCountriesXResponse })
   async getOne(@Param('id', ParseIntPipe) id: number) {
     const query = new GetOneCountriesXRequest();
@@ -105,7 +105,7 @@ export class CountriesControllerX {
   }
 }
 
-@Controller('countries/')
+@Controller('countries')
 export class CountriesController {
   constructor(
     private readonly commandBus: CommandBus,
@@ -118,7 +118,7 @@ export class CountriesController {
     return await this.queryBus.execute(new GetAllCountriesRequest(filter));
   }
 
-  @Get('get/:id')
+  @Get('/get/:id')
   @ApiOkResponse({ type: GetOneCountriesResponse })
   async getOne(@Param('id', ParseIntPipe) id: number) {
     const query = new GetOneCountriesRequest();

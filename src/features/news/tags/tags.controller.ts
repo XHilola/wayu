@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { GetAllTagsXResponse } from './admin/getAll-tags-x/getAll-tags-x-response';
@@ -18,10 +18,12 @@ import { JwtGuard } from '../../../core/guards/jwt.guard';
 import { RolesGuard } from '../../../core/guards/roles.guard';
 import { Roles } from '../../../core/decors/roles.decorator';
 import { RolesEnum } from '../../../core/enums/roles.enum';
+import { PaginatedResultDto } from '../../../core/paginatedResult.dto';
+import { GetAllTagsFilter } from './tags.filter';
 
-@UseGuards(JwtGuard,RolesGuard)
+@UseGuards(JwtGuard, RolesGuard)
 @ApiBearerAuth()
-@Roles(RolesEnum.admin,RolesEnum.superAdmin)
+@Roles(RolesEnum.admin, RolesEnum.superAdmin)
 @Controller('tags/admin')
 export class TagsXController {
   constructor(
@@ -30,9 +32,9 @@ export class TagsXController {
   ) {}
 
   @Get()
-  @ApiOkResponse({ type: GetAllTagsXResponse })
-  async getAll() {
-    return await this.queryBus.execute(new GetAllTagsXRequest());
+  @ApiOkResponse({ type: PaginatedResultDto(GetAllTagsXResponse) })
+  async getAll(@Query() filter: GetAllTagsFilter) {
+    return await this.queryBus.execute(new GetAllTagsXRequest(filter));
   }
 
   @Get('/:id')
@@ -67,7 +69,6 @@ export class TagsXController {
   }
 }
 
-
 @Controller('tags')
 export class TagsController {
   constructor(
@@ -76,9 +77,9 @@ export class TagsController {
   ) {}
 
   @Get()
-  @ApiOkResponse({ type: GetAllTagsResponse })
-  async getAll() {
-    return await this.queryBus.execute(new GetAllTagsRequest());
+  @ApiOkResponse({ type: PaginatedResultDto(GetAllTagsResponse) })
+  async getAll(@Query() filter: GetAllTagsFilter) {
+    return await this.queryBus.execute(new GetAllTagsRequest(filter));
   }
 
   @Get('/:id')

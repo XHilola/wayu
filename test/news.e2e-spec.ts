@@ -17,8 +17,8 @@ describe('NewsController (e2e)', () => {
   beforeAll(async () => {
     ({ app, dataSource } = await createTestApp());
     const password = await argon2.hash('qwer');
-    await dataSource.query(`INSERT INTO users ("fullName", "login", "loginType", "isVerified", "isActive", "role", "password")
-                            VALUES ('Ali', 'ali@gmail.com', 'email', true, true, 'superAdmin', '${password}')`);
+    await dataSource.query(`INSERT INTO users ("fullName", "login", "loginType", "isActive", "role", "password")
+                            VALUES ('Ali', 'ali@gmail.com', 'email', true,'superAdmin', '${password}')`);
     await dataSource.query(`INSERT INTO news_categories ("title") VALUES ('Politics')`);
     await dataSource.query(`INSERT INTO countries ("title", "flag") VALUES ('Uzbekistan', 'flag.png')`);
     await dataSource.query(`INSERT INTO tags ("title") VALUES ('Breaking')`);

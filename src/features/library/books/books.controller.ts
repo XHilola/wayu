@@ -1,15 +1,5 @@
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import {
-  Body,
-  Controller,
-  Delete, Get,
-  Param,
-  ParseIntPipe,
-  Patch,
-  Post,
-  UploadedFiles, UseGuards,
-  UseInterceptors,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { ApiBearerAuth, ApiConsumes, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { storageOptions } from '../../../config/multer.config';
@@ -33,10 +23,12 @@ import { JwtGuard } from '../../../core/guards/jwt.guard';
 import { RolesGuard } from '../../../core/guards/roles.guard';
 import { Roles } from '../../../core/decors/roles.decorator';
 import { RolesEnum } from '../../../core/enums/roles.enum';
+import { PaginatedResultDto } from '../../../core/paginatedResult.dto';
+import { GetAllBooksFilter } from './books-filter';
 
-@UseGuards(JwtGuard,RolesGuard)
+@UseGuards(JwtGuard, RolesGuard)
 @ApiBearerAuth()
-@Roles(RolesEnum.admin,RolesEnum.superAdmin)
+@Roles(RolesEnum.admin, RolesEnum.superAdmin)
 @Controller('books/admin')
 export class BooksXController {
   constructor(
@@ -56,7 +48,7 @@ export class BooksXController {
     @UploadedFiles() files: { image?: Express.Multer.File[]; file?: Express.Multer.File[] },
   ) {
     const image = files.image?.[0];
-    const file  = files.file?.[0];
+    const file = files.file?.[0];
     const cmd = new CreateBooksXCommand(
       payload.authorId,
       payload.categoryId,
@@ -67,12 +59,11 @@ export class BooksXController {
       file,
       payload.description,
     );
-    // cmd.authorId=payload.authorId
     try {
       return await this.commandBus.execute(cmd);
     } catch (exc) {
       if (image && fs.existsSync(image.path)) fs.rmSync(image.path);
-      if (file  && fs.existsSync(file.path))  fs.rmSync(file.path);
+      if (file && fs.existsSync(file.path)) fs.rmSync(file.path);
       throw exc;
     }
   }
@@ -90,7 +81,7 @@ export class BooksXController {
     @UploadedFiles() files?: { image?: Express.Multer.File[]; file?: Express.Multer.File[] },
   ) {
     const image = files?.image?.[0];
-    const file  = files?.file?.[0];
+    const file = files?.file?.[0];
     const cmd = new UpdateBooksXCommand(
       id,
       payload.authorId,
@@ -106,7 +97,7 @@ export class BooksXController {
       return await this.commandBus.execute(cmd);
     } catch (exc) {
       if (image && fs.existsSync(image.path)) fs.rmSync(image.path);
-      if (file  && fs.existsSync(file.path))  fs.rmSync(file.path);
+      if (file && fs.existsSync(file.path)) fs.rmSync(file.path);
       throw exc;
     }
   }
@@ -119,9 +110,9 @@ export class BooksXController {
   }
 
   @Get()
-  @ApiOkResponse({ type: [GetAllBooksXResponse] })
-  async getAll() {
-    return await this.queryBus.execute(new GetAllBooksXRequest());
+  @ApiOkResponse({ type: PaginatedResultDto(GetAllBooksXResponse) })
+  async getAll(@Query() filter: GetAllBooksFilter) {
+    return await this.queryBus.execute(new GetAllBooksXRequest(filter));
   }
 
   @Get(':id')
@@ -133,7 +124,6 @@ export class BooksXController {
   }
 }
 
-
 @Controller('books/')
 export class BooksController {
   constructor(
@@ -142,9 +132,9 @@ export class BooksController {
   ) {}
 
   @Get()
-  @ApiOkResponse({ type: [GetAllBooksResponse] })
-  async getAll() {
-    return await this.queryBus.execute(new GetAllBooksRequest());
+  @ApiOkResponse({ type: PaginatedResultDto(GetAllBooksResponse) })
+  async getAll(@Query() filter: GetAllBooksFilter) {
+    return await this.queryBus.execute(new GetAllBooksRequest(filter));
   }
 
   @Get(':id')

@@ -1,14 +1,4 @@
-import {
-  Body,
-  Controller,
-  Delete, Get,
-  Param,
-  ParseIntPipe,
-  Patch,
-  Post,
-  UploadedFile, UseGuards,
-  UseInterceptors,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiBearerAuth, ApiConsumes, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -32,17 +22,18 @@ import { JwtGuard } from '../../../core/guards/jwt.guard';
 import { RolesGuard } from '../../../core/guards/roles.guard';
 import { Roles } from '../../../core/decors/roles.decorator';
 import { RolesEnum } from '../../../core/enums/roles.enum';
+import { PaginatedResultDto } from '../../../core/paginatedResult.dto';
+import { GetAllEventsFilter } from './events-filter';
 
-@UseGuards(JwtGuard,RolesGuard)
+@UseGuards(JwtGuard, RolesGuard)
 @ApiBearerAuth()
-@Roles(RolesEnum.admin,RolesEnum.superAdmin)
+@Roles(RolesEnum.admin, RolesEnum.superAdmin)
 @Controller('events/admin')
 export class EventsXController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
-  ) {
-  }
+  ) {}
 
   @Post('create')
   @ApiConsumes('multipart/form-data')
@@ -63,8 +54,7 @@ export class EventsXController {
     try {
       return await this.commandBus.execute(cmd);
     } catch (exc) {
-      if (image && fs.existsSync(image.path))
-        fs.rmSync(image.path);
+      if (image && fs.existsSync(image.path)) fs.rmSync(image.path);
       throw exc;
     }
   }
@@ -90,8 +80,7 @@ export class EventsXController {
     try {
       return await this.commandBus.execute(cmd);
     } catch (exc) {
-      if (image && fs.existsSync(image.path))
-        fs.rmSync(image.path);
+      if (image && fs.existsSync(image.path)) fs.rmSync(image.path);
       throw exc;
     }
   }
@@ -104,9 +93,9 @@ export class EventsXController {
   }
 
   @Get()
-  @ApiOkResponse({ type: [GetAllEventsXResponse] })
-  async getAll() {
-    return await this.queryBus.execute(new GetAllEventsXRequest());
+  @ApiOkResponse({ type: PaginatedResultDto(GetAllEventsXResponse) })
+  async getAll(@Query() filter: GetAllEventsFilter) {
+    return await this.queryBus.execute(new GetAllEventsXRequest(filter));
   }
 
   @Get(':id')
@@ -123,14 +112,12 @@ export class EventsController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
-  ) {
-  }
-
+  ) {}
 
   @Get()
-  @ApiOkResponse({ type: [GetAllEventsResponse] })
-  async getAll() {
-    return await this.queryBus.execute(new GetAllEventsRequest());
+  @ApiOkResponse({ type: PaginatedResultDto(GetAllEventsResponse) })
+  async getAll(@Query() filter: GetAllEventsFilter) {
+    return await this.queryBus.execute(new GetAllEventsRequest(filter));
   }
 
   @Get(':id')

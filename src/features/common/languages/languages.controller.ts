@@ -1,12 +1,14 @@
-import { CreateLanguagesXResponse } from './admin/create-languages-x/create-languages-x-response';
 import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
+import { CreateLanguagesXResponse } from './admin/create-languages-x/create-languages-x-response';
 import { CreateLanguagesXRequest } from './admin/create-languages-x/create-languages-x-request';
 import { UpdateLanguagesXResponse } from './admin/update-languages-x/update-languages-x-response';
 import { UpdateLanguagesXRequest } from './admin/update-languages-x/update-languages-x-request';
 import { DeleteLanguagesXRequest } from './admin/delete-languages-x/delete-languages-x-request';
+import { PaginatedResultDto } from '../../../core/paginatedResult.dto';
 import { GetAllLanguagesXResponse } from './admin/get-all-languages-x/get-all-languages-x-response';
+import { GetAllLanguagesFilter } from './languages-filter';
 import { GetAllLanguagesXRequest } from './admin/get-all-languages-x/get-all-languages-x-request';
 import { GetOneLanguagesXResponse } from './admin/get-one-languages-x/get-one-languages-x-response';
 import { GetOneLanguagesXRequest } from './admin/get-one-languages-x/get-one-languages-x-request';
@@ -14,12 +16,10 @@ import { GetAllLanguagesResponse } from './public/get-all-languages/get-all-lang
 import { GetAllLanguagesRequest } from './public/get-all-languages/get-all-languages-request';
 import { GetOneLanguagesResponse } from './public/get-one-languages/get-one-languages-response';
 import { GetOneLanguagesRequest } from './public/get-one-languages/get-one-languages-request';
+import { Roles } from '../../../core/decors/roles.decorator';
 import { JwtGuard } from '../../../core/guards/jwt.guard';
 import { RolesGuard } from '../../../core/guards/roles.guard';
-import { Roles } from '../../../core/decors/roles.decorator';
 import { RolesEnum } from '../../../core/enums/roles.enum';
-import { GetAllLanguagesFilter } from './languages-filter';
-import { PaginatedResultDto } from '../../../core/paginatedResult.dto';
 
 @UseGuards(JwtGuard,RolesGuard)
 @ApiBearerAuth()
@@ -31,13 +31,13 @@ export class LanguagesXController {
     private readonly queryBus: QueryBus,
   ) {}
 
-  @Post('create')
+  @Post('/create')
   @ApiCreatedResponse({ type: CreateLanguagesXResponse })
   async create(@Body() payload: CreateLanguagesXRequest) {
     return await this.commandBus.execute(payload);
   }
 
-  @Patch('patch/:id')
+  @Patch('/patch/:id')
   @ApiOkResponse({ type: UpdateLanguagesXResponse })
   async update(
     @Param('id', ParseIntPipe) id: number,
@@ -49,7 +49,7 @@ export class LanguagesXController {
     return await this.commandBus.execute(cmd);
   }
 
-  @Delete('delete/:id')
+  @Delete('/delete/:id')
   async delete(@Param('id', ParseIntPipe) id: number) {
     const cmd = new DeleteLanguagesXRequest();
     cmd.id = id;
@@ -62,7 +62,7 @@ export class LanguagesXController {
     return await this.queryBus.execute(new GetAllLanguagesXRequest(filter));
   }
 
-  @Get(':id')
+  @Get('get/:id')
   @ApiOkResponse({ type: GetOneLanguagesXResponse })
   async getOne(@Param('id', ParseIntPipe) id: number) {
     const query = new GetOneLanguagesXRequest();
@@ -71,7 +71,7 @@ export class LanguagesXController {
   }
 }
 
-@Controller('languages/')
+@Controller('languages')
 export class LanguagesController {
   constructor(
     private readonly commandBus: CommandBus,
@@ -79,13 +79,13 @@ export class LanguagesController {
   ) {}
 
 
-  @Get()
+  @Get('/public')
   @ApiOkResponse({ type: PaginatedResultDto(GetAllLanguagesResponse) })
   async getAll(@Query() filter: GetAllLanguagesFilter) {
     return await this.queryBus.execute(new GetAllLanguagesRequest(filter));
   }
 
-  @Get(':id')
+  @Get('/:id')
   @ApiOkResponse({ type: GetOneLanguagesResponse })
   async getOne(@Param('id', ParseIntPipe) id: number) {
     const query = new GetOneLanguagesRequest();

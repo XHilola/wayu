@@ -1,5 +1,5 @@
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { GetAllExpensesXResponse } from './admin/getAll-expenses-x/getAll-expenses-x-response';
 import { GetAllExpensesXRequest } from './admin/getAll-expenses-x/getAll-expenses-x-request';
@@ -18,10 +18,12 @@ import { JwtGuard } from '../../../core/guards/jwt.guard';
 import { RolesGuard } from '../../../core/guards/roles.guard';
 import { Roles } from '../../../core/decors/roles.decorator';
 import { RolesEnum } from '../../../core/enums/roles.enum';
+import { PaginatedResultDto } from '../../../core/paginatedResult.dto';
+import { GetAllExpensesFilter } from './expenses.filter';
 
-@UseGuards(JwtGuard,RolesGuard)
+@UseGuards(JwtGuard, RolesGuard)
 @ApiBearerAuth()
-@Roles(RolesEnum.admin,RolesEnum.superAdmin)
+@Roles(RolesEnum.admin, RolesEnum.superAdmin)
 @Controller('expenses/admin')
 export class ExpensesXController {
   constructor(
@@ -30,9 +32,9 @@ export class ExpensesXController {
   ) {}
 
   @Get()
-  @ApiOkResponse({ type: GetAllExpensesXResponse })
-  async getAll() {
-    return await this.queryBus.execute(new GetAllExpensesXRequest());
+  @ApiOkResponse({ type: PaginatedResultDto(GetAllExpensesXResponse) })
+  async getAll(@Query() filter: GetAllExpensesFilter) {
+    return await this.queryBus.execute(new GetAllExpensesXRequest(filter));
   }
 
   @Get('/:id')
@@ -79,9 +81,9 @@ export class ExpensesController {
   ) {}
 
   @Get()
-  @ApiOkResponse({ type: GetAllExpensesResponse })
-  async getAll() {
-    return await this.queryBus.execute(new GetAllExpensesRequest());
+  @ApiOkResponse({ type: PaginatedResultDto(GetAllExpensesResponse) })
+  async getAll(@Query() filter: GetAllExpensesFilter) {
+    return await this.queryBus.execute(new GetAllExpensesRequest(filter));
   }
 
   @Get('/:id')

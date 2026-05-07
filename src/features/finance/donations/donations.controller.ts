@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { GetAllDonationsResponse } from './public/getAll-donations/getAll-donations-response';
@@ -16,7 +16,8 @@ import { JwtGuard } from '../../../core/guards/jwt.guard';
 import { RolesGuard } from '../../../core/guards/roles.guard';
 import { Roles } from '../../../core/decors/roles.decorator';
 import { RolesEnum } from '../../../core/enums/roles.enum';
-
+import { PaginatedResultDto } from '../../../core/paginatedResult.dto';
+import { GetAllDonationsFilter } from './donations-filter';
 
 @Controller('donations')
 export class DonationsController {
@@ -26,11 +27,10 @@ export class DonationsController {
   ) {}
 
   @Get()
-  @ApiOkResponse({ type: GetAllDonationsResponse })
-  async getAll() {
-    return await this.queryBus.execute(new GetAllDonationsRequest());
+  @ApiOkResponse({ type: PaginatedResultDto(GetAllDonationsResponse) })
+  async getAll(@Query() filter: GetAllDonationsFilter) {
+    return await this.queryBus.execute(new GetAllDonationsRequest(filter));
   }
-
 
   @Post()
   @ApiCreatedResponse({ type: CreateDonationsResponse })
@@ -59,9 +59,9 @@ export class DonationsController {
   }
 }
 
-@UseGuards(JwtGuard,RolesGuard)
+@UseGuards(JwtGuard, RolesGuard)
 @ApiBearerAuth()
-@Roles(RolesEnum.admin,RolesEnum.superAdmin)
+@Roles(RolesEnum.admin, RolesEnum.superAdmin)
 @Controller('donations')
 export class DonationsXController {
   constructor(
@@ -70,9 +70,9 @@ export class DonationsXController {
   ) {}
 
   @Get()
-  @ApiOkResponse({ type: GetAllDonationsXResponse })
-  async getAll() {
-    return await this.queryBus.execute(new GetAllDonationsXRequest());
+  @ApiOkResponse({ type: PaginatedResultDto(GetAllDonationsXResponse) })
+  async getAll(@Query() filter: GetAllDonationsFilter) {
+    return await this.queryBus.execute(new GetAllDonationsXRequest(filter));
   }
 
   @Get('/:id')

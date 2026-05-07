@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { CreateEventCategoriesXResponse } from './admin/create-event-categories-x/create-event-categories-x-response';
@@ -18,10 +18,12 @@ import { JwtGuard } from '../../../core/guards/jwt.guard';
 import { RolesGuard } from '../../../core/guards/roles.guard';
 import { Roles } from '../../../core/decors/roles.decorator';
 import { RolesEnum } from '../../../core/enums/roles.enum';
+import { PaginatedResultDto } from '../../../core/paginatedResult.dto';
+import { GetAllEventCategoriesFilter } from './event-categories-filter';
 
-@UseGuards(JwtGuard,RolesGuard)
+@UseGuards(JwtGuard, RolesGuard)
 @ApiBearerAuth()
-@Roles(RolesEnum.admin,RolesEnum.superAdmin)
+@Roles(RolesEnum.admin, RolesEnum.superAdmin)
 @Controller('event-categories/admin')
 export class EventCategoriesXController {
   constructor(
@@ -52,9 +54,9 @@ export class EventCategoriesXController {
   }
 
   @Get()
-  @ApiOkResponse({ type: [GetAllEventCategoriesXResponse] })
-  async getAll() {
-    return await this.queryBus.execute(new GetAllEventCategoriesXRequest());
+  @ApiOkResponse({ type: PaginatedResultDto(GetAllEventCategoriesXResponse) })
+  async getAll(@Query() filter: GetAllEventCategoriesFilter) {
+    return await this.queryBus.execute(new GetAllEventCategoriesXRequest(filter));
   }
 
   @Get(':id')
@@ -74,9 +76,9 @@ export class EventCategoriesController {
   ) {}
 
   @Get()
-  @ApiOkResponse({ type: [GetAllEventCategoriesResponse] })
-  async getAll() {
-    return await this.queryBus.execute(new GetAllEventCategoriesRequest());
+  @ApiOkResponse({ type: PaginatedResultDto(GetAllEventCategoriesResponse) })
+  async getAll(@Query() filter: GetAllEventCategoriesFilter) {
+    return await this.queryBus.execute(new GetAllEventCategoriesRequest(filter));
   }
 
   @Get(':id')
