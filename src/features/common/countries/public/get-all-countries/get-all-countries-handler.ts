@@ -6,14 +6,22 @@ import { GetAllCountriesResponse } from './get-all-countries-response';
 import { ConfigService } from '@nestjs/config';
 import { ILike } from 'typeorm';
 import { PaginatedResult } from '../../../../../core/paginatedResult.dto';
+import {Cache} from '@nestjs/cache-manager';
 
 @QueryHandler(GetAllCountriesRequest)
 export class GetAllCountriesHandler implements IQueryHandler<GetAllCountriesRequest> {
-  constructor(private readonly config: ConfigService) {}
+  constructor(
+    private readonly config: ConfigService,
+    private readonly cache:Cache
+    ) {}
 
   async execute(query: GetAllCountriesRequest): Promise<PaginatedResult> {
     const page = query.page ?? 1;
     const size = query.size ?? 10;
+    const cachedData=await this.cache.get<PaginatedResult>(`country:${page}:${size}`)
+    if (cachedData){
+      return cachedData
+    }
     const skip = (page - 1) * size;
 
     const [countries, totalCount] = await Countries.findAndCount({
@@ -31,7 +39,7 @@ export class GetAllCountriesHandler implements IQueryHandler<GetAllCountriesRequ
 
     const totalPages = Math.ceil(totalCount / size);
 
-    return {
+    let country_data= {
       totalPages,
       previousPage: page > 1 ? page - 1 : undefined,
       currentPage: page,
@@ -39,5 +47,9 @@ export class GetAllCountriesHandler implements IQueryHandler<GetAllCountriesRequ
       totalCount,
       data,
     };
+    await this.cache.set(`country:${page}:${size}`,country_data)
+    return country_data
   }
 }
+//temant
+//angular
